@@ -16,6 +16,7 @@ import { PLANS } from '@/lib/plans';
 import { withRedirect } from '@/lib/redirect';
 import type { RouterOutputs } from '@/trpc/react';
 import { Check, HelpCircle, Loader, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import Confetti from 'react-dom-confetti';
@@ -31,13 +32,16 @@ function formatMonthlyPrice(amount: number, billing: Billing): string {
   return Number.isInteger(monthly) ? String(monthly) : monthly.toFixed(2);
 }
 
-function getPlanAction(currentPlan: string, plan: string): string {
+function getPlanAction(
+  currentPlan: string,
+  plan: string
+): 'currentPlan' | 'upgrade' | 'downgrade' {
   if (currentPlan === plan) {
-    return 'Current plan';
+    return 'currentPlan';
   }
   return TIER_ORDER.indexOf(plan) > TIER_ORDER.indexOf(currentPlan)
-    ? 'Upgrade'
-    : 'Downgrade';
+    ? 'upgrade'
+    : 'downgrade';
 }
 
 export const PricingCards = ({
@@ -48,6 +52,8 @@ export const PricingCards = ({
   user?: RouterOutputs['user']['me'];
 }) => {
   const [isPending, startTransition] = useTransition();
+  const t = useTranslations('pricing');
+  const tp = useTranslations('plans');
 
   // Someone already paying changes or cancels their plan in Polar's portal.
   // Sending them through checkout again would start a second subscription
@@ -65,7 +71,7 @@ export const PricingCards = ({
         }
       } catch (err) {
         toast({
-          title: "Couldn't open billing",
+          title: t('billingError'),
           description: getErrorMessage(err),
           variant: 'destructive',
         });
@@ -83,10 +89,10 @@ export const PricingCards = ({
           key={plan.name}
           className="flex w-full flex-col rounded-lg border border-border bg-background px-6 py-3 md:px-8"
         >
-          <p className="font-cal text-lg">{plan.name}</p>
+          <p className="font-cal text-lg">{tp(`${plan.slug}.name`)}</p>
 
           <p className="mt-0.5 text-muted-foreground text-sm">
-            {plan.description}
+            {tp(`${plan.slug}.description`)}
           </p>
 
           <p className="mt-3 font-cal text-4xl">
@@ -94,7 +100,8 @@ export const PricingCards = ({
           </p>
 
           <p className="mt-1 text-muted-foreground text-xs">
-            per month{billing === 'annually' && ', billed annually'}
+            {t('perMonth')}
+            {billing === 'annually' && t('billedAnnually')}
           </p>
 
           <div className="mt-3 flex w-full flex-col gap-1.5 text-left">
@@ -111,7 +118,7 @@ export const PricingCards = ({
                     size={14}
                   />
                 )}
-                {f.text}
+                {tp(`${plan.slug}.features.${idx}`)}
                 {f.tooltip && (
                   <TooltipProvider>
                     <Tooltip>
@@ -122,7 +129,7 @@ export const PricingCards = ({
                         />
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>{f.tooltip}</p>
+                        <p>{tp(`${plan.slug}.tooltips.${idx}`)}</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -144,7 +151,7 @@ export const PricingCards = ({
               {isPending && (
                 <Loader className="mr-2 inline-block animate-spin" size={16} />
               )}
-              {getPlanAction(user.plan, plan.slug)}
+              {t(getPlanAction(user.plan, plan.slug))}
             </Button>
           ) : (
             // Signed out (the landing page): every plan starts with an account.
@@ -160,7 +167,9 @@ export const PricingCards = ({
                     : withRedirect('/app/sign-up', '/app?tab=settings')
                 }
               >
-                {plan.slug === 'free' ? 'Get started' : `Get ${plan.name}`}
+                {plan.slug === 'free'
+                  ? t('getStarted')
+                  : t('getPlan', { plan: tp(`${plan.slug}.name`) })}
               </Link>
             </Button>
           )}
@@ -176,18 +185,17 @@ export const PricingCards = ({
 
 export default function Pricing() {
   const [billing, setBilling] = useState<Billing>('monthly');
+  const t = useTranslations('pricing');
 
   return (
     <div className="flex w-full flex-col">
       <h1 className="font-cal text-3xl md:text-5xl">
-        Simple, transparent
+        {t('titleLine1')}
         <br />
-        pricing
+        {t('titleLine2')}
       </h1>
 
-      <p className="mt-4 text-lg md:text-xl">
-        Start with a free plan and upgrade as you grow.
-      </p>
+      <p className="mt-4 text-lg md:text-xl">{t('subtitle')}</p>
 
       <Tabs
         defaultValue="monthly"
@@ -200,10 +208,10 @@ export default function Pricing() {
           config={{ elementCount: 250, spread: 100 }}
         />
         <TabsList className="w-max">
-          <TabsTrigger value="monthly">Monthly</TabsTrigger>
+          <TabsTrigger value="monthly">{t('monthly')}</TabsTrigger>
           <TabsTrigger value="annually" className="gap-x-2">
-            Annually
-            <Badge>2 months free</Badge>
+            {t('annually')}
+            <Badge>{t('twoMonthsFree')}</Badge>
           </TabsTrigger>
         </TabsList>
 
@@ -216,11 +224,9 @@ export default function Pricing() {
         </TabsContent>
 
         <div className="mt-6 flex w-full flex-col rounded-lg border border-border bg-background px-3 py-3 text-center md:px-8">
-          <p className="font-cal text-2xl">Enterprise</p>
+          <p className="font-cal text-2xl">{t('enterprise')}</p>
 
-          <p className="mt-1 text-muted-foreground">
-            Need more? Contact us for a custom plan for your company.
-          </p>
+          <p className="mt-1 text-muted-foreground">{t('enterpriseDesc')}</p>
 
           <Button asChild className="mx-auto mt-5 w-max">
             <Link
@@ -228,7 +234,7 @@ export default function Pricing() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              Schedule call
+              {t('scheduleCall')}
             </Link>
           </Button>
         </div>

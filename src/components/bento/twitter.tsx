@@ -24,6 +24,7 @@ function extractTweetId(url: string): string | null {
   return match?.[1] ?? null;
 }
 import Image from '@/components/ui/remote-image';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { FaXTwitter } from 'react-icons/fa6';
 import type * as z from 'zod';
@@ -171,6 +172,7 @@ function LargeTweet({
     photos: { url: string; width: number; height: number }[];
   };
 }) {
+  const t = useTranslations('cards');
   return (
     <div className="flex h-full w-full flex-col p-5">
       <div className="flex items-center gap-3">
@@ -199,7 +201,7 @@ function LargeTweet({
         <div className="mt-3 overflow-hidden rounded-xl">
           <Image
             src={tweet.photos[0].url}
-            alt="Tweet media"
+            alt={t('tweetMedia')}
             width={tweet.photos[0].width}
             height={tweet.photos[0].height}
             className="h-auto w-full object-cover"
@@ -235,6 +237,7 @@ export default function TwitterCard({
   bento: BentoData;
   editable?: boolean;
 }) {
+  const t = useTranslations('cards');
   const [editOpen, setEditOpen] = useState(false);
   const [tweetUrl, setTweetUrl] = useState('');
 
@@ -277,9 +280,9 @@ export default function TwitterCard({
           <p className="text-muted-foreground text-xs">
             {/* A deleted or private tweet never loads; say so rather than
                 leaving "Loading..." up forever. */}
-            {!hasTweet && editable && 'Add a tweet'}
-            {hasTweet && isTweetLoading && 'Loading...'}
-            {hasTweet && !isTweetLoading && 'Tweet unavailable'}
+            {!hasTweet && editable && t('addTweet')}
+            {hasTweet && isTweetLoading && t('loading')}
+            {hasTweet && !isTweetLoading && t('tweetUnavailable')}
           </p>
         </div>
       );
@@ -326,7 +329,7 @@ export default function TwitterCard({
         {editable && (
           <button
             type="button"
-            aria-label="Edit card"
+            aria-label={t('editCard')}
             className="absolute top-3 right-3 z-50 cursor-pointer rounded-lg border border-border/50 bg-background/90 p-1.5 text-muted-foreground opacity-0 shadow-md backdrop-blur-sm transition-all hover:bg-accent hover:text-accent-foreground focus-visible:opacity-100 group-hover:opacity-100"
             onPointerDown={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
@@ -344,13 +347,13 @@ export default function TwitterCard({
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-cal text-xl">
-              Edit Tweet Card
+              {t('editTweet')}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="tweet-url" className="font-medium text-sm">
-                Tweet URL
+                {t('tweetUrl')}
               </Label>
               <Input
                 id="tweet-url"
@@ -360,7 +363,7 @@ export default function TwitterCard({
                 className="rounded-xl"
               />
               <p className="text-[11px] text-muted-foreground">
-                Paste a link from twitter.com or x.com
+                {t('pasteTweet')}
               </p>
             </div>
 
@@ -368,7 +371,7 @@ export default function TwitterCard({
               <div className="flex items-center gap-2 rounded-xl border border-border p-3">
                 <FaXTwitter size={16} className="text-muted-foreground" />
                 <span className="font-cal text-sm">
-                  Tweet ID: {extractTweetId(tweetUrl)}
+                  {t('tweetId')} {extractTweetId(tweetUrl)}
                 </span>
               </div>
             )}
@@ -378,7 +381,7 @@ export default function TwitterCard({
               className="w-full rounded-xl"
               disabled={!extractTweetId(tweetUrl) || isPending}
             >
-              {isPending ? 'Saving...' : 'Save'}
+              {isPending ? t('saving') : t('save')}
             </Button>
           </div>
         </DialogContent>

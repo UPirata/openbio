@@ -22,6 +22,7 @@ import {
 import { cn } from '@/lib/utils';
 import type { CountdownBentoSchema } from '@/types';
 import { Pencil } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import type * as z from 'zod';
 
@@ -65,9 +66,12 @@ function Finished({
 const isFinished = (timeLeft: TimeLeft) => timeLeft.isPast || timeLeft.isToday;
 
 function CountdownDisplay({ timeLeft }: { timeLeft: TimeLeft }) {
+  const t = useTranslations('cards');
   if (timeLeft.days > 7) {
     return (
-      <p className="font-cal text-2xl tabular-nums">in {timeLeft.days} days</p>
+      <p className="font-cal text-2xl tabular-nums">
+        {t('inDays', { days: timeLeft.days })}
+      </p>
     );
   }
   if (timeLeft.days >= 1) {
@@ -173,6 +177,7 @@ function LargeCountdown({
   bento: BentoData;
   timeLeft: TimeLeft;
 }) {
+  const t = useTranslations('cards');
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-5 p-6 text-center">
       {bento.emoji && <span className="text-4xl">{bento.emoji}</span>}
@@ -182,10 +187,10 @@ function LargeCountdown({
       ) : (
         <div className="grid grid-cols-4 gap-4">
           {[
-            { value: timeLeft.days, label: 'Days' },
-            { value: timeLeft.hours, label: 'Hours' },
-            { value: timeLeft.minutes, label: 'Minutes' },
-            { value: timeLeft.seconds, label: 'Seconds' },
+            { value: timeLeft.days, label: t('days') },
+            { value: timeLeft.hours, label: t('hours') },
+            { value: timeLeft.minutes, label: t('minutes') },
+            { value: timeLeft.seconds, label: t('seconds') },
           ].map((item) => (
             <div
               key={item.label}
@@ -222,6 +227,7 @@ export default function CountdownCard({
   bento: BentoData;
   editable?: boolean;
 }) {
+  const t = useTranslations('cards');
   const [editOpen, setEditOpen] = useState(false);
   const [title, setTitle] = useState(bento.title ?? '');
   const [targetDate, setTargetDate] = useState(bento.targetDate || '');
@@ -235,8 +241,8 @@ export default function CountdownCard({
   const handleSave = async () => {
     if (!targetDate) {
       toast({
-        title: 'Missing date',
-        description: 'Please select a target date.',
+        title: t('missingDate'),
+        description: t('selectDate'),
       });
       return;
     }
@@ -246,8 +252,8 @@ export default function CountdownCard({
     const day = parseTargetDay(targetDate);
     if (!day) {
       toast({
-        title: 'Invalid date',
-        description: 'Please enter a valid date.',
+        title: t('invalidDate'),
+        description: t('enterValidDate'),
       });
       return;
     }
@@ -265,7 +271,7 @@ export default function CountdownCard({
       return;
     }
     setEditOpen(false);
-    toast({ title: 'Saved', description: 'Countdown updated.' });
+    toast({ title: t('saved'), description: t('countdownUpdated') });
   };
 
   const cardSize = useCardSize(bento);
@@ -279,7 +285,7 @@ export default function CountdownCard({
         <div className="flex h-full w-full flex-col items-center justify-center gap-2 rounded-2xl bg-muted/30">
           <span className="text-2xl">⏰</span>
           <p className="text-muted-foreground text-xs">
-            {editable ? 'Set date' : ''}
+            {editable ? t('setDate') : ''}
           </p>
         </div>
       );
@@ -325,7 +331,7 @@ export default function CountdownCard({
         {editable && (
           <button
             type="button"
-            aria-label="Edit card"
+            aria-label={t('editCard')}
             className="absolute top-3 right-3 z-50 cursor-pointer rounded-lg border border-border/50 bg-background/90 p-1.5 text-muted-foreground opacity-0 shadow-md backdrop-blur-sm transition-all hover:bg-accent hover:text-accent-foreground focus-visible:opacity-100 group-hover:opacity-100"
             onPointerDown={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
@@ -343,13 +349,13 @@ export default function CountdownCard({
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-cal text-xl">
-              Edit Countdown
+              {t('editCountdown')}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="cd-emoji" className="font-medium text-sm">
-                Emoji
+                {t('emoji')}
               </Label>
               <Input
                 id="cd-emoji"
@@ -363,7 +369,7 @@ export default function CountdownCard({
 
             <div className="space-y-2">
               <Label htmlFor="cd-title" className="font-medium text-sm">
-                Title
+                {t('title')}
               </Label>
               <Input
                 id="cd-title"
@@ -376,7 +382,7 @@ export default function CountdownCard({
 
             <div className="space-y-2">
               <Label htmlFor="cd-date" className="font-medium text-sm">
-                Target Date
+                {t('targetDate')}
               </Label>
               <Input
                 id="cd-date"
@@ -393,7 +399,7 @@ export default function CountdownCard({
 
             <div className="space-y-2">
               <Label htmlFor="cd-repeat" className="font-medium text-sm">
-                Repeat
+                {t('repeat')}
               </Label>
               <select
                 id="cd-repeat"
@@ -401,10 +407,10 @@ export default function CountdownCard({
                 onChange={(e) => setRepeat(e.target.value as typeof repeat)}
                 className="h-9 w-full rounded-xl border border-border bg-card px-3 text-sm"
               >
-                <option value="none">Don&apos;t repeat</option>
-                <option value="weekly">Every week</option>
-                <option value="monthly">Every month</option>
-                <option value="yearly">Every year</option>
+                <option value="none">{t('dontRepeat')}</option>
+                <option value="weekly">{t('everyWeek')}</option>
+                <option value="monthly">{t('everyMonth')}</option>
+                <option value="yearly">{t('everyYear')}</option>
               </select>
             </div>
 
@@ -413,7 +419,7 @@ export default function CountdownCard({
               disabled={isPending}
               className="w-full rounded-xl"
             >
-              {isPending ? 'Saving...' : 'Save'}
+              {isPending ? t('saving') : t('save')}
             </Button>
           </div>
         </DialogContent>

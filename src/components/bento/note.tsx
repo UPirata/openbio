@@ -34,6 +34,7 @@ import {
   Pencil,
   Sparkles,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import type * as z from 'zod';
@@ -61,6 +62,7 @@ function NoteContent({ html }: { html: string }) {
 function AiNoteButton({
   onGenerated,
 }: { onGenerated: (html: string) => void }) {
+  const t = useTranslations('cards');
   const [open, setOpen] = useState(false);
   const [prompt, setPrompt] = useState('');
 
@@ -69,11 +71,11 @@ function AiNoteButton({
     onFinish: (_p, text) => {
       setOpen(false);
       setPrompt('');
-      toast({ title: 'Note generated!', description: 'AI content applied.' });
+      toast({ title: t('noteGenerated'), description: t('aiContentApplied') });
     },
     onError: (err) => {
       toast({
-        title: 'Error',
+        title: t('error'),
         description: err.message,
         variant: 'destructive',
       });
@@ -95,7 +97,7 @@ function AiNoteButton({
           variant="ghost"
           size="sm"
           className="h-7 w-7 p-0 text-violet-500"
-          aria-label="Write with AI"
+          aria-label={t('writeWithAI')}
         >
           <Sparkles className="h-3 w-3" />
         </Button>
@@ -110,9 +112,9 @@ function AiNoteButton({
           }}
           className="flex flex-col gap-2"
         >
-          <p className="font-medium text-xs">Write with AI</p>
+          <p className="font-medium text-xs">{t('writeWithAI')}</p>
           <Input
-            placeholder="e.g. write a short intro about my photography"
+            placeholder={t('notePromptPlaceholder')}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             className="h-8 rounded-lg text-xs"
@@ -129,7 +131,7 @@ function AiNoteButton({
             ) : (
               <Sparkles className="mr-1 h-3 w-3" />
             )}
-            {isLoading ? 'Writing...' : 'Generate (1 credit)'}
+            {isLoading ? t('writing') : t('generate1')}
           </Button>
         </form>
       </PopoverContent>
@@ -146,13 +148,14 @@ function NoteEditor({
   onSave: (html: string) => void;
   isSaving?: boolean;
 }) {
+  const t = useTranslations('cards');
   const [preview, setPreview] = useState(false);
 
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
       StarterKit,
-      Placeholder.configure({ placeholder: 'Write something...' }),
+      Placeholder.configure({ placeholder: t('writeSomething') }),
     ],
     content: initialContent,
     editable: true,
@@ -178,7 +181,7 @@ function NoteEditor({
               size="sm"
               className={btnClass}
               onClick={() => editor.chain().focus().toggleBold().run()}
-              aria-label="Bold"
+              aria-label={t('bold')}
             >
               <Bold className="h-3 w-3" />
             </Button>
@@ -188,7 +191,7 @@ function NoteEditor({
               size="sm"
               className={btnClass}
               onClick={() => editor.chain().focus().toggleItalic().run()}
-              aria-label="Italic"
+              aria-label={t('italic')}
             >
               <Italic className="h-3 w-3" />
             </Button>
@@ -202,7 +205,7 @@ function NoteEditor({
               onClick={() =>
                 editor.chain().focus().toggleHeading({ level: 2 }).run()
               }
-              aria-label="Heading"
+              aria-label={t('heading')}
             >
               <Heading2 className="h-3 w-3" />
             </Button>
@@ -212,7 +215,7 @@ function NoteEditor({
               size="sm"
               className={btnClass}
               onClick={() => editor.chain().focus().toggleBulletList().run()}
-              aria-label="Bullet list"
+              aria-label={t('bulletList')}
             >
               <List className="h-3 w-3" />
             </Button>
@@ -238,12 +241,12 @@ function NoteEditor({
           {preview ? (
             <>
               <PenLine className="h-3 w-3" />
-              Edit
+              {t('edit')}
             </>
           ) : (
             <>
               <Eye className="h-3 w-3" />
-              Preview
+              {t('preview')}
             </>
           )}
         </Button>
@@ -271,7 +274,7 @@ function NoteEditor({
           }
         }}
       >
-        {isSaving ? 'Saving...' : 'Save'}
+        {isSaving ? t('saving') : t('save')}
       </Button>
     </div>
   );
@@ -284,6 +287,7 @@ export default function NoteCard({
   bento: BentoData;
   editable?: boolean;
 }) {
+  const t = useTranslations('cards');
   const params = useParams<{ link: string }>();
   const [editOpen, setEditOpen] = useState(false);
   const queryClient = api.useContext();
@@ -335,14 +339,14 @@ export default function NoteCard({
           <NoteContent key={bento.text} html={bento.text} />
         ) : (
           <p className="text-muted-foreground text-xs">
-            {editable ? 'Empty note' : ''}
+            {editable ? t('emptyNote') : ''}
           </p>
         )}
 
         {editable && (
           <button
             type="button"
-            aria-label="Edit card"
+            aria-label={t('editCard')}
             className="absolute right-3 bottom-3 z-50 cursor-pointer rounded-lg border border-border/50 bg-background/90 p-1.5 text-muted-foreground opacity-0 shadow-md backdrop-blur-sm transition-all hover:bg-accent hover:text-accent-foreground focus-visible:opacity-100 group-hover:opacity-100"
             onPointerDown={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
@@ -364,7 +368,9 @@ export default function NoteCard({
       >
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="font-cal text-xl">Edit Note</DialogTitle>
+            <DialogTitle className="font-cal text-xl">
+              {t('editNote')}
+            </DialogTitle>
           </DialogHeader>
           {editOpen && (
             <NoteEditor

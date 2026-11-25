@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import UserSettings from '@/components/user-settings';
 import { getLinkLimit, isUserPremium } from '@/server/db/utils/user';
 import { api } from '@/trpc/server';
+import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
@@ -19,6 +20,7 @@ export default async function Page() {
   }
 
   const links = await api.profileLink.getAll();
+  const t = await getTranslations('dashboard');
 
   // Mirrors the server-side check in `profileLink.create`, so the button never
   // offers a page the account is not allowed to make.
@@ -30,15 +32,15 @@ export default async function Page() {
     <div className="flex w-full flex-col gap-y-6">
       <UpgradeCelebration />
       <div className="flex items-center justify-between">
-        <h1 className="font-cal text-3xl">Dashboard</h1>
+        <h1 className="font-cal text-3xl">{t('title')}</h1>
         {canCreate ? (
           <Link href="/claim-link">
-            <GradientButton>Create new</GradientButton>
+            <GradientButton>{t('createNew')}</GradientButton>
           </Link>
         ) : (
           <Link href="/app?tab=settings">
             <GradientButton className="text-xs sm:text-sm">
-              Upgrade to add more
+              {t('upgradeToAddMore')}
             </GradientButton>
           </Link>
         )}

@@ -15,6 +15,7 @@ import { toSafeUrl } from '@/lib/url';
 import { api } from '@/trpc/react';
 import { LinkBentoSchema } from '@/types';
 import { Globe } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import type React from 'react';
 import { type ReactNode, useState } from 'react';
@@ -102,6 +103,9 @@ export default function CreateLinkBentoModal({
   onOpenChange?: (open: boolean) => void;
 }) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const t = useTranslations('modals');
+  const tb = useTranslations('bento');
+  const tc = useTranslations('common');
   const open = controlledOpen ?? uncontrolledOpen;
   const setOpen = controlledOnOpenChange ?? setUncontrolledOpen;
 
@@ -139,8 +143,8 @@ export default function CreateLinkBentoModal({
           queryClient.profileLink.getByLink.setData({ link }, context.previous);
         }
         toast({
-          title: "Couldn't add this link",
-          description: 'Please check the link and try again.',
+          title: t('addLinkError'),
+          description: t('checkLink'),
           variant: 'destructive',
         });
       },
@@ -152,8 +156,8 @@ export default function CreateLinkBentoModal({
     const href = toSafeUrl(input);
     if (!href) {
       toast({
-        title: 'Invalid link',
-        description: 'Enter a full link, like https://example.com.',
+        title: tb('invalidLink'),
+        description: tb('invalidLinkDesc'),
         variant: 'destructive',
       });
       return;
@@ -188,7 +192,9 @@ export default function CreateLinkBentoModal({
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-cal text-xl">Add Link</DialogTitle>
+          <DialogTitle className="font-cal text-xl">
+            {t('addLinkTitle')}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-5">
@@ -220,7 +226,7 @@ export default function CreateLinkBentoModal({
           {selectedPreset === null && (
             <div className="flex items-center gap-2 text-muted-foreground text-xs">
               <div className="h-px flex-1 bg-border" />
-              <span>or paste any URL</span>
+              <span>{t('orPasteUrl')}</span>
               <div className="h-px flex-1 bg-border" />
             </div>
           )}
@@ -243,7 +249,7 @@ export default function CreateLinkBentoModal({
                 autoCapitalize="none"
                 autoCorrect="off"
                 spellCheck={false}
-                aria-label="Link URL"
+                aria-label={t('linkUrl')}
                 placeholder={placeholder}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -259,14 +265,14 @@ export default function CreateLinkBentoModal({
                 className="rounded-xl px-6"
                 onClick={() => setOpen(false)}
               >
-                Cancel
+                {tc('cancel')}
               </Button>
               <Button
                 type="submit"
                 disabled={!input || isPending}
                 className="rounded-xl px-6"
               >
-                {isPending ? 'Adding...' : 'Add link'}
+                {isPending ? t('adding') : t('addLink')}
               </Button>
             </div>
           </form>

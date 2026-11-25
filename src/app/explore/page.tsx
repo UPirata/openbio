@@ -3,39 +3,39 @@ import { htmlToText } from '@/lib/html';
 import { api } from '@/trpc/server';
 import { LayoutGrid } from 'lucide-react';
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 
-export const metadata: Metadata = {
-  title: 'Explore Profiles | OpenBio',
-  description: 'Discover creative profiles built with OpenBio',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('explore');
+  return {
+    title: t('metaTitle'),
+    description: t('metaDescription'),
+  };
+}
 
 export default async function ExplorePage() {
   const { profiles } = await api.profileLink.listPublic({ limit: 40 });
+  const t = await getTranslations('explore');
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
       <div className="mb-10 max-w-xl">
-        <h1 className="font-cal text-4xl md:text-5xl">Explore</h1>
-        <p className="mt-3 text-lg text-muted-foreground">
-          Discover creative profiles built with OpenBio. Get inspired, connect
-          with creators, and build your own.
-        </p>
+        <h1 className="font-cal text-4xl md:text-5xl">{t('title')}</h1>
+        <p className="mt-3 text-lg text-muted-foreground">{t('description')}</p>
         <Link
           href="/claim-link"
           className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 font-medium text-primary-foreground text-sm transition-opacity hover:opacity-90"
         >
-          Create yours free
+          {t('createFree')}
         </Link>
       </div>
 
       {profiles.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-20 text-center">
           <LayoutGrid className="h-10 w-10 text-muted-foreground/50" />
-          <p className="font-medium text-lg">No public profiles yet</p>
-          <p className="text-muted-foreground text-sm">
-            Be the first to share your profile with the world.
-          </p>
+          <p className="font-medium text-lg">{t('empty')}</p>
+          <p className="text-muted-foreground text-sm">{t('beFirst')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -74,7 +74,7 @@ export default async function ExplorePage() {
                   )}
                   {cardCount > 0 && (
                     <p className="mt-1.5 text-muted-foreground/70 text-xs">
-                      {cardCount} {cardCount === 1 ? 'card' : 'cards'}
+                      {t('cards', { count: cardCount })}
                     </p>
                   )}
                 </div>

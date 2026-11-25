@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 import { api } from '@/trpc/react';
 import { Check, Loader2, Sparkles, Wand2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 type ProfileSuggestion = {
@@ -30,6 +31,8 @@ export default function ProfileBuilder({
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const t = useTranslations('ai');
+  const tc = useTranslations('common');
   const [description, setDescription] = useState('');
   const [result, setResult] = useState<ProfileSuggestion | null>(null);
 
@@ -43,7 +46,7 @@ export default function ProfileBuilder({
     },
     onError: (err) => {
       toast({
-        title: 'Error',
+        title: tc('error'),
         description: err.message,
         variant: 'destructive',
       });
@@ -63,18 +66,18 @@ export default function ProfileBuilder({
     setResult(null);
     setDescription('');
     toast({
-      title: 'Profile built!',
-      description: 'AI suggestions have been applied to your profile.',
+      title: t('profileBuilt'),
+      description: t('profileBuiltDesc'),
     });
   };
 
   const cardTypeLabels: Record<string, string> = {
-    link: 'Link',
-    note: 'Note',
-    music: 'Music',
-    calendar: 'Booking',
-    github: 'GitHub',
-    'email-collect': 'Newsletter',
+    link: t('cardTypes.link'),
+    note: t('cardTypes.note'),
+    music: t('cardTypes.music'),
+    calendar: t('cardTypes.calendar'),
+    github: t('cardTypes.github'),
+    'email-collect': t('cardTypes.emailCollect'),
   };
 
   return (
@@ -84,31 +87,32 @@ export default function ProfileBuilder({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 font-cal text-xl">
             <Sparkles className="h-4 w-4 text-violet-500" />
-            AI Profile Builder
+            {t('profileBuilder')}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           {credits && (
             <p className="text-muted-foreground text-xs">
-              {credits.remaining}/{credits.limit} credits remaining
+              {t('creditsRemaining', {
+                remaining: credits.remaining,
+                limit: credits.limit,
+              })}
             </p>
           )}
 
           <div className="space-y-2">
             <Label htmlFor="ai-desc" className="font-medium text-sm">
-              Describe yourself
+              {t('describeYourself')}
             </Label>
             <Input
               id="ai-desc"
-              placeholder="e.g. I'm a freelance photographer based in Mumbai who shoots weddings and street photography"
+              placeholder={t('describePlaceholder')}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="rounded-xl"
             />
-            <p className="text-muted-foreground text-xs">
-              The more detail you give, the better the suggestions.
-            </p>
+            <p className="text-muted-foreground text-xs">{t('moreDetail')}</p>
           </div>
 
           <Button
@@ -123,14 +127,14 @@ export default function ProfileBuilder({
             ) : (
               <Wand2 className="mr-2 h-4 w-4" />
             )}
-            {isPending ? 'Building...' : 'Build Profile (3 credits)'}
+            {isPending ? t('building') : t('buildProfile')}
           </Button>
 
           {result && (
             <div className="space-y-4">
               {/* Generated bio */}
               <div className="space-y-1.5">
-                <p className="font-medium text-sm">Suggested Bio</p>
+                <p className="font-medium text-sm">{t('suggestedBio')}</p>
                 <div className="rounded-xl border border-border bg-muted/50 p-3">
                   <p className="text-sm leading-relaxed">{result.bio}</p>
                 </div>
@@ -138,7 +142,7 @@ export default function ProfileBuilder({
 
               {/* Suggested cards */}
               <div className="space-y-1.5">
-                <p className="font-medium text-sm">Suggested Cards</p>
+                <p className="font-medium text-sm">{t('suggestedCards')}</p>
                 <div className="space-y-2">
                   {result.cards.map((card, i) => (
                     <div
@@ -171,10 +175,10 @@ export default function ProfileBuilder({
                   onClick={handleBuild}
                   disabled={isPending}
                 >
-                  Regenerate
+                  {t('regenerate')}
                 </Button>
                 <Button className="flex-1 rounded-xl" onClick={handleApply}>
-                  Apply All
+                  {t('applyAll')}
                 </Button>
               </div>
             </div>

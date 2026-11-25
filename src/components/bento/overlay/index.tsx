@@ -8,6 +8,7 @@ import ManageSize from '@/components/bento/overlay/manage-size';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import type { BentoSchema } from '@/server/db';
 import { Maximize2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import type * as z from 'zod';
@@ -19,6 +20,7 @@ export default function CardOverlay({
   bento: z.infer<typeof BentoSchema>;
   allowedSizes?: readonly string[];
 }) {
+  const t = useTranslations('cards');
   const [active, setActive] = useState(false);
   const [sizePickerOpen, setSizePickerOpen] = useState(false);
   const leaveTimeout = useRef<ReturnType<typeof setTimeout>>(null);
@@ -139,7 +141,7 @@ export default function CardOverlay({
               type="button"
               className="-translate-y-1/2 absolute top-0 right-3 z-30 flex h-7 w-7 items-center justify-center rounded-lg border border-border/50 bg-background/90 shadow-md backdrop-blur-sm transition-colors hover:bg-accent active:scale-95"
               onClick={() => setSizePickerOpen(true)}
-              aria-label="Resize card"
+              aria-label={t('resizeCard')}
             >
               <Maximize2 className="h-3.5 w-3.5 text-muted-foreground" />
             </button>

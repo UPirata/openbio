@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { forgetPassword, resetPassword } from '@/lib/auth-client';
 import OpenBioLogo from '@/public/openbio.png';
 import { Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -28,6 +29,8 @@ export default function ResetPasswordPage() {
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
+  const t = useTranslations('auth');
+  const tc = useTranslations('common');
 
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -48,19 +51,19 @@ function ResetPasswordForm() {
     });
 
     if (result.error) {
-      setError(result.error.message ?? 'Something went wrong');
+      setError(result.error.message ?? tc('somethingWentWrong'));
       setLoading(false);
       return;
     }
 
-    setSuccess('Check your email for a password reset link.');
+    setSuccess(t('resetEmailSent'));
     setLoading(false);
   };
 
   const handleResetPassword = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('passwordsMismatch'));
       return;
     }
     setLoading(true);
@@ -73,12 +76,12 @@ function ResetPasswordForm() {
     });
 
     if (result.error) {
-      setError(result.error.message ?? 'Something went wrong');
+      setError(result.error.message ?? tc('somethingWentWrong'));
       setLoading(false);
       return;
     }
 
-    setSuccess('Your password has been reset. You can now sign in.');
+    setSuccess(t('passwordResetDone'));
     setLoading(false);
   };
 
@@ -89,19 +92,17 @@ function ResetPasswordForm() {
           <Image src={OpenBioLogo} alt="OpenBio" width={48} height={48} />
         </Link>
         <h1 className="mt-4 font-cal text-2xl">
-          {token ? 'Choose a new password' : 'Reset your password'}
+          {token ? t('chooseNewPassword') : t('resetYourPassword')}
         </h1>
         <p className="mt-1 text-muted-foreground text-sm">
-          {token
-            ? 'Enter your new password below'
-            : "We'll send you a link to reset your password"}
+          {token ? t('enterNewPassword') : t('sendResetLinkInfo')}
         </p>
       </div>
 
       {token ? (
         <form onSubmit={handleResetPassword} className="flex flex-col gap-y-5">
           <div className="space-y-2">
-            <Label htmlFor="newPassword">New password</Label>
+            <Label htmlFor="newPassword">{t('newPassword')}</Label>
             <Input
               id="newPassword"
               type="password"
@@ -114,7 +115,7 @@ function ResetPasswordForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm new password</Label>
+            <Label htmlFor="confirmPassword">{t('confirmNewPassword')}</Label>
             <Input
               id="confirmPassword"
               type="password"
@@ -144,7 +145,7 @@ function ResetPasswordForm() {
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              'Reset password'
+              t('resetPassword')
             )}
           </GradientButton>
           {success && (
@@ -152,14 +153,14 @@ function ResetPasswordForm() {
               href="/app/sign-in"
               className="text-center text-muted-foreground text-sm underline underline-offset-4 hover:text-foreground"
             >
-              Go to sign in
+              {t('goToSignIn')}
             </Link>
           )}
         </form>
       ) : (
         <form onSubmit={handleRequestReset} className="flex flex-col gap-y-5">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{tc('email')}</Label>
             <Input
               id="email"
               type="email"
@@ -188,19 +189,19 @@ function ResetPasswordForm() {
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              'Send reset link'
+              t('sendResetLink')
             )}
           </GradientButton>
         </form>
       )}
 
       <p className="mt-6 text-center text-muted-foreground text-sm">
-        Remember your password?{' '}
+        {t('rememberPassword')}{' '}
         <Link
           href="/app/sign-in"
           className="font-medium text-foreground underline underline-offset-4 hover:text-violet-600"
         >
-          Sign in
+          {t('signIn')}
         </Link>
       </p>
     </div>

@@ -8,6 +8,7 @@ import { signIn } from '@/lib/auth-client';
 import { getSafeRedirect, withRedirect } from '@/lib/redirect';
 import OpenBioLogo from '@/public/openbio.png';
 import { Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -17,6 +18,8 @@ export default function SignInPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = getSafeRedirect(searchParams.get('redirectUrl'));
+  const t = useTranslations('auth');
+  const tc = useTranslations('common');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -35,8 +38,8 @@ export default function SignInPage() {
     if (result.error) {
       setError(
         result.error.code === 'EMAIL_NOT_VERIFIED'
-          ? 'Please verify your email first. We just sent you a new verification link.'
-          : (result.error.message ?? 'Something went wrong')
+          ? t('verifyFirst')
+          : (result.error.message ?? tc('somethingWentWrong'))
       );
       setLoading(false);
       return;
@@ -50,14 +53,14 @@ export default function SignInPage() {
         <Link href="/">
           <Image src={OpenBioLogo} alt="OpenBio" width={48} height={48} />
         </Link>
-        <h1 className="mt-4 font-cal text-2xl">Welcome back</h1>
+        <h1 className="mt-4 font-cal text-2xl">{t('welcomeBack')}</h1>
         <p className="mt-1 text-muted-foreground text-sm">
-          Sign in to your account
+          {t('signInSubtitle')}
         </p>
       </div>
       <form onSubmit={handleSubmit} className="flex flex-col gap-y-5">
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{tc('email')}</Label>
           <Input
             id="email"
             type="email"
@@ -69,7 +72,7 @@ export default function SignInPage() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">{tc('password')}</Label>
           <Input
             id="password"
             type="password"
@@ -84,7 +87,7 @@ export default function SignInPage() {
               href="/app/reset-password"
               className="text-muted-foreground text-sm hover:text-foreground"
             >
-              Forgot your password?
+              {t('forgotPassword')}
             </Link>
           </div>
         </div>
@@ -98,7 +101,7 @@ export default function SignInPage() {
           disabled={loading}
           className="mt-1 w-full"
         >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Sign in'}
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t('signIn')}
         </GradientButton>
       </form>
       <div className="relative my-6">
@@ -107,7 +110,7 @@ export default function SignInPage() {
         </div>
         <div className="relative flex justify-center text-xs uppercase">
           <span className="bg-card px-2 text-muted-foreground">
-            or continue with
+            {t('orContinueWith')}
           </span>
         </div>
       </div>
@@ -166,12 +169,12 @@ export default function SignInPage() {
         </Button>
       </div>
       <p className="mt-6 text-center text-muted-foreground text-sm">
-        Don&apos;t have an account?{' '}
+        {t('noAccount')}{' '}
         <Link
           href={withRedirect('/app/sign-up', redirectTo)}
           className="font-medium text-foreground underline underline-offset-4 hover:text-violet-600"
         >
-          Sign up
+          {t('signUp')}
         </Link>
       </p>
     </div>

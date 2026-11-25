@@ -1,6 +1,7 @@
 'use client';
 
 import { toast } from '@/components/ui/use-toast';
+import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import Confetti from 'react-dom-confetti';
@@ -11,6 +12,7 @@ function CelebrationInner() {
   const upgraded = searchParams.get('upgraded') === 'true';
   const fired = useRef(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const t = useTranslations('settings');
 
   useEffect(() => {
     if (upgraded && !fired.current) {
@@ -22,14 +24,13 @@ function CelebrationInner() {
       });
 
       toast({
-        title: 'Welcome to Pro!',
-        description:
-          'You now have access to all card types, themes, custom domains, and more.',
+        title: t('welcomePro'),
+        description: t('welcomeProDesc'),
       });
 
       router.replace('/app', { scroll: false });
     }
-  }, [upgraded, router]);
+  }, [upgraded, router, t]);
 
   if (!upgraded && !showConfetti) {
     return null;

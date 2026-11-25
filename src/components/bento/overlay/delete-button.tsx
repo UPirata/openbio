@@ -10,6 +10,7 @@ import { toast } from '@/components/ui/use-toast';
 import type { BentoSchema } from '@/server/db';
 import { api } from '@/trpc/react';
 import { Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import type * as z from 'zod';
 
@@ -18,6 +19,7 @@ export default function DeleteButton({
 }: {
   bento: z.infer<typeof BentoSchema>;
 }) {
+  const t = useTranslations('cards');
   const { link } = useParams<{ link: string }>();
   const { pushSnapshot } = useBentoHistory();
 
@@ -43,8 +45,8 @@ export default function DeleteButton({
         queryClient.profileLink.getByLink.setData({ link }, context.previous);
       }
       toast({
-        title: "Couldn't delete this card",
-        description: 'Please try again.',
+        title: t('deleteCardError'),
+        description: t('tryAgain'),
         variant: 'destructive',
       });
     },
@@ -63,13 +65,13 @@ export default function DeleteButton({
               id: bento.id,
             });
           }}
-          aria-label="Delete card"
+          aria-label={t('deleteCard')}
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
       </TooltipTrigger>
       <TooltipContent side="bottom" className="text-xs">
-        Delete
+        {t('delete')}
       </TooltipContent>
     </Tooltip>
   );

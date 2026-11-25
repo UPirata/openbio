@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { api } from '@/trpc/react';
 import type { ViewsBentoSchema } from '@/types';
 import { Eye } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import type * as z from 'zod';
 
@@ -43,6 +44,7 @@ function useCountUp(target: number, duration = 1000) {
 }
 
 function CompactViews({ views }: { views: number }) {
+  const t = useTranslations('cards');
   const animatedCount = useCountUp(views);
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-5">
@@ -51,13 +53,16 @@ function CompactViews({ views }: { views: number }) {
         <p className="font-cal text-3xl leading-tight">
           {animatedCount.toLocaleString()}
         </p>
-        <p className="mt-1 text-muted-foreground text-xs">profile views</p>
+        <p className="mt-1 text-muted-foreground text-xs">
+          {t('profileViews')}
+        </p>
       </div>
     </div>
   );
 }
 
 function BannerViews({ views }: { views: number }) {
+  const t = useTranslations('cards');
   const animatedCount = useCountUp(views);
   return (
     <div className="flex h-full w-full items-center justify-center gap-3 px-6">
@@ -65,7 +70,7 @@ function BannerViews({ views }: { views: number }) {
       <p className="font-cal text-xl leading-tight">
         {animatedCount.toLocaleString()}
       </p>
-      <p className="text-muted-foreground text-sm">profile views</p>
+      <p className="text-muted-foreground text-sm">{t('profileViews')}</p>
     </div>
   );
 }

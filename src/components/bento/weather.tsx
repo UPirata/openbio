@@ -16,6 +16,7 @@ import { useSaveBento } from '@/hooks/use-save-bento';
 import { cn } from '@/lib/utils';
 import type { WeatherBentoSchema } from '@/types';
 import { Locate, Pencil } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import type * as z from 'zod';
 
@@ -56,28 +57,29 @@ const WEATHER_EMOJI: Record<string, string> = {
   '99': '⛈️',
 };
 
+/** Open-Meteo weather codes → keys in the `weather` messages namespace. */
 const WEATHER_DESC: Record<string, string> = {
-  '0': 'Clear sky',
-  '1': 'Mostly clear',
-  '2': 'Partly cloudy',
-  '3': 'Overcast',
-  '45': 'Foggy',
-  '48': 'Rime fog',
-  '51': 'Light drizzle',
-  '53': 'Drizzle',
-  '55': 'Heavy drizzle',
-  '61': 'Light rain',
-  '63': 'Rain',
-  '65': 'Heavy rain',
-  '71': 'Light snow',
-  '73': 'Snow',
-  '75': 'Heavy snow',
-  '80': 'Light showers',
-  '81': 'Showers',
-  '82': 'Heavy showers',
-  '95': 'Thunderstorm',
-  '96': 'Thunderstorm with hail',
-  '99': 'Severe thunderstorm',
+  '0': 'clearSky',
+  '1': 'mostlyClear',
+  '2': 'partlyCloudy',
+  '3': 'overcast',
+  '45': 'foggy',
+  '48': 'rimeFog',
+  '51': 'lightDrizzle',
+  '53': 'drizzle',
+  '55': 'heavyDrizzle',
+  '61': 'lightRain',
+  '63': 'rain',
+  '65': 'heavyRain',
+  '71': 'lightSnow',
+  '73': 'snow',
+  '75': 'heavySnow',
+  '80': 'lightShowers',
+  '81': 'showers',
+  '82': 'heavyShowers',
+  '95': 'thunderstorm',
+  '96': 'thunderstormHail',
+  '99': 'severeThunderstorm',
 };
 
 function useWeather(lat: number, lng: number) {
@@ -101,7 +103,7 @@ function useWeather(lat: number, lng: number) {
         setWeather({
           temp: Math.round(data.current.temperature_2m),
           feelsLike: Math.round(data.current.apparent_temperature),
-          description: WEATHER_DESC[code] ?? 'Unknown',
+          description: WEATHER_DESC[code] ?? 'unknown',
           icon: WEATHER_EMOJI[code] ?? '🌡️',
           humidity: data.current.relative_humidity_2m,
           windSpeed: Math.round(data.current.wind_speed_10m),
@@ -162,6 +164,7 @@ function CompactWeather({
   weather: WeatherData;
   locationName?: string;
 }) {
+  const tw = useTranslations('weather');
   return (
     <div className="flex h-full w-full flex-col justify-between p-5">
       <div className="flex items-start justify-between">
@@ -171,7 +174,9 @@ function CompactWeather({
         <span className="font-cal text-3xl">{weather.temp}°</span>
       </div>
       <div className="space-y-0.5">
-        <p className="font-cal text-sm leading-tight">{weather.description}</p>
+        <p className="font-cal text-sm leading-tight">
+          {tw(weather.description)}
+        </p>
         {locationName && (
           <p className="truncate text-muted-foreground text-xs">
             {locationName}
@@ -189,6 +194,8 @@ function WideWeather({
   weather: WeatherData;
   locationName?: string;
 }) {
+  const t = useTranslations('cards');
+  const tw = useTranslations('weather');
   return (
     <div className="flex h-full w-full items-center gap-6 p-6">
       <div className="flex items-center gap-4">
@@ -196,13 +203,13 @@ function WideWeather({
         <div>
           <span className="font-cal text-4xl">{weather.temp}°C</span>
           <p className="text-muted-foreground text-xs">
-            Feels like {weather.feelsLike}°
+            {t('feelsLike')} {weather.feelsLike}°
           </p>
         </div>
       </div>
       <div className="h-10 w-px bg-border" />
       <div className="space-y-1">
-        <p className="font-cal text-sm">{weather.description}</p>
+        <p className="font-cal text-sm">{tw(weather.description)}</p>
         {locationName && (
           <p className="text-muted-foreground text-xs">{locationName}</p>
         )}
@@ -228,13 +235,14 @@ function WeatherContent({
   cardSize: string;
   displayLocation?: string;
 }) {
+  const t = useTranslations('cards');
   if (!hasLocation || !weather) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center gap-2 rounded-2xl bg-muted/30">
         <span className="text-2xl">🌤️</span>
         <p className="text-muted-foreground text-xs">
-          {editable && 'Set location'}
-          {!editable && !weather && 'Loading...'}
+          {editable && t('setLocation')}
+          {!editable && !weather && t('loading')}
         </p>
       </div>
     );
@@ -252,6 +260,7 @@ export default function WeatherCard({
   bento: BentoData;
   editable?: boolean;
 }) {
+  const t = useTranslations('cards');
   const [editOpen, setEditOpen] = useState(false);
   const [latitude, setLatitude] = useState(String(bento.latitude || ''));
   const [longitude, setLongitude] = useState(String(bento.longitude || ''));
@@ -267,8 +276,8 @@ export default function WeatherCard({
   const handleUseMyLocation = useCallback(() => {
     if (!navigator.geolocation) {
       toast({
-        title: 'Geolocation not supported',
-        description: 'Your browser does not support geolocation.',
+        title: t('geoUnsupported'),
+        description: t('geoUnsupportedDesc'),
       });
       return;
     }
@@ -279,25 +288,25 @@ export default function WeatherCard({
         setLongitude(String(position.coords.longitude));
         setLocating(false);
         toast({
-          title: 'Location updated',
-          description: 'Coordinates have been filled in.',
+          title: t('locationUpdated'),
+          description: t('coordsFilled'),
         });
       },
       (err) => {
         setLocating(false);
         const msgs: Record<number, string> = {
-          1: 'Permission denied. Go to browser settings to allow location for this site.',
-          2: 'Position unavailable. Try again or enter coordinates manually.',
-          3: 'Request timed out. Try again.',
+          1: t('geoDenied'),
+          2: t('geoUnavailable'),
+          3: t('geoTimeout'),
         };
         toast({
-          title: 'Could not get location',
-          description: msgs[err.code] ?? 'Unknown error.',
+          title: t('geoFailed'),
+          description: msgs[err.code] ?? t('unknownError'),
         });
       },
       { enableHighAccuracy: false, timeout: 10000 }
     );
-  }, []);
+  }, [t]);
 
   const handleSave = async () => {
     const lat = Number.parseFloat(latitude);
@@ -346,7 +355,7 @@ export default function WeatherCard({
         {editable && (
           <button
             type="button"
-            aria-label="Edit card"
+            aria-label={t('editCard')}
             className="absolute top-3 right-3 z-50 cursor-pointer rounded-lg border border-border/50 bg-background/90 p-1.5 text-muted-foreground opacity-0 shadow-md backdrop-blur-sm transition-all hover:bg-accent hover:text-accent-foreground focus-visible:opacity-100 group-hover:opacity-100"
             onPointerDown={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
@@ -363,7 +372,9 @@ export default function WeatherCard({
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="font-cal text-xl">Edit Weather</DialogTitle>
+            <DialogTitle className="font-cal text-xl">
+              {t('editWeather')}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <Button
@@ -374,13 +385,13 @@ export default function WeatherCard({
               onClick={handleUseMyLocation}
             >
               <Locate className="mr-2 h-4 w-4" />
-              {locating ? 'Getting location...' : 'Use my location'}
+              {locating ? t('gettingLocation') : t('useMyLocation')}
             </Button>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label htmlFor="w-lat" className="font-medium text-sm">
-                  Latitude
+                  {t('latitude')}
                 </Label>
                 <Input
                   id="w-lat"
@@ -392,7 +403,7 @@ export default function WeatherCard({
               </div>
               <div className="space-y-2">
                 <Label htmlFor="w-lng" className="font-medium text-sm">
-                  Longitude
+                  {t('longitude')}
                 </Label>
                 <Input
                   id="w-lng"
@@ -406,11 +417,11 @@ export default function WeatherCard({
 
             <div className="space-y-2">
               <Label htmlFor="w-name" className="font-medium text-sm">
-                Location Name (optional)
+                {t('locationName')}
               </Label>
               <Input
                 id="w-name"
-                placeholder="Auto-detected from coordinates"
+                placeholder={t('autoDetected')}
                 value={locationName}
                 onChange={(e) => setLocationName(e.target.value)}
                 className="rounded-xl"
@@ -422,7 +433,7 @@ export default function WeatherCard({
               disabled={isPending}
               className="w-full rounded-xl"
             >
-              {isPending ? 'Saving...' : 'Save'}
+              {isPending ? t('saving') : t('save')}
             </Button>
           </div>
         </DialogContent>

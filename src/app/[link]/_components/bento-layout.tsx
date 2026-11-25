@@ -11,6 +11,7 @@ import {
 import { toast } from '@/components/ui/use-toast';
 import { api } from '@/trpc/react';
 import type { BentoSchema } from '@/types';
+import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import {
@@ -80,6 +81,7 @@ export default function BentoLayout({
   );
 
   const { preview } = usePreview();
+  const t = useTranslations('editor');
   const { pushSnapshot } = useBentoHistory();
   const utils = api.useUtils();
   const { data: profileLink } = api.profileLink.getByLink.useQuery(
@@ -91,8 +93,8 @@ export default function BentoLayout({
     api.profileLink.updateBentoPositions.useMutation({
       onError: () => {
         toast({
-          title: "Couldn't save layout",
-          description: 'Your cards were moved back. Please try again.',
+          title: t('layoutError'),
+          description: t('layoutErrorDesc'),
           variant: 'destructive',
         });
         utils.profileLink.getByLink.invalidate({ link });

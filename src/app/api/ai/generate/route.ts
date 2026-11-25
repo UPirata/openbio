@@ -1,9 +1,11 @@
+import { isLocale, localeEnglishNames } from '@/i18n/config';
 import { auth } from '@/lib/auth';
 import {
   consumeAiCredits,
   refundAiCredits,
 } from '@/server/db/utils/ai-credits';
 import { streamText } from 'ai';
+import { getLocale } from 'next-intl/server';
 import * as z from 'zod';
 
 export const maxDuration = 30;
@@ -102,9 +104,14 @@ export async function POST(req: Request) {
     });
   }
 
+  const locale = await getLocale();
+  const language = isLocale(locale) ? localeEnglishNames[locale] : 'English';
+  const prompts = buildPrompts(body);
+
   const result = streamText({
     model: 'openai/gpt-5.4-mini',
-    ...buildPrompts(body),
+    ...prompts,
+    system: `${prompts.system}\nWrite the text in ${language}.`,
     // The stream fails after the credits were taken; hand them back.
     onError: async () => {
       await refundAiCredits(userId, creditCost).catch(() => undefined);

@@ -16,6 +16,7 @@ import { isHostOf } from '@/lib/url';
 import { cn } from '@/lib/utils';
 import type { CalendarBentoSchema } from '@/types';
 import { Calendar, ExternalLink, Pencil } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import type * as z from 'zod';
 
@@ -66,7 +67,7 @@ function getEmbedUrl(url: string): string | null {
   return embed.href;
 }
 
-function getProviderName(url: string): string {
+function getProviderName(url: string): string | null {
   const provider = getProvider(url);
   if (provider === 'cal') {
     return 'Cal.com';
@@ -74,7 +75,7 @@ function getProviderName(url: string): string {
   if (provider === 'calendly') {
     return 'Calendly';
   }
-  return 'Calendar';
+  return null;
 }
 
 function CalendarDisplay({
@@ -86,9 +87,10 @@ function CalendarDisplay({
   onBookClick: () => void;
   compact?: boolean;
 }) {
-  const title = bento.title || 'Book a time';
-  const description = bento.description || 'Schedule a meeting with me';
-  const provider = getProviderName(bento.url);
+  const t = useTranslations('cards');
+  const title = bento.title || t('bookATime');
+  const description = bento.description || t('scheduleMeeting');
+  const provider = getProviderName(bento.url) ?? t('calendar');
 
   if (compact) {
     return (
@@ -103,7 +105,7 @@ function CalendarDisplay({
             className="mt-2 inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 font-medium text-primary-foreground text-xs transition-opacity hover:opacity-90"
             onClick={onBookClick}
           >
-            Book
+            {t('book')}
           </button>
         </div>
       </div>
@@ -125,10 +127,10 @@ function CalendarDisplay({
             onClick={onBookClick}
           >
             <Calendar className="h-3.5 w-3.5" />
-            Book a time
+            {t('bookATime')}
           </button>
           <span className="text-muted-foreground/60 text-xs">
-            via {provider}
+            {t('via')} {provider}
           </span>
         </div>
       </div>
@@ -143,6 +145,7 @@ export default function CalendarCard({
   bento: BentoData;
   editable?: boolean;
 }) {
+  const t = useTranslations('cards');
   const [editOpen, setEditOpen] = useState(false);
   const [bookOpen, setBookOpen] = useState(false);
   const [url, setUrl] = useState(bento.url ?? '');
@@ -204,7 +207,7 @@ export default function CalendarCard({
         {editable && (
           <button
             type="button"
-            aria-label="Edit card"
+            aria-label={t('editCard')}
             className="absolute top-3 right-3 z-50 cursor-pointer rounded-lg border border-border/50 bg-background/90 p-1.5 text-muted-foreground opacity-0 shadow-md backdrop-blur-sm transition-all hover:bg-accent hover:text-accent-foreground focus-visible:opacity-100 group-hover:opacity-100"
             onPointerDown={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
@@ -223,14 +226,14 @@ export default function CalendarCard({
         <DialogContent className="flex h-[85vh] max-h-175 flex-col overflow-hidden sm:max-w-2xl">
           <DialogHeader className="shrink-0">
             <DialogTitle className="flex items-center justify-between font-cal text-xl">
-              {bento.title || 'Book a time'}
+              {bento.title || t('bookATime')}
               <a
                 href={bento.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 font-normal text-muted-foreground text-xs hover:text-foreground"
               >
-                Open in {getProviderName(bento.url)}
+                {t('openIn')} {getProviderName(bento.url) ?? t('calendar')}
                 <ExternalLink className="h-3 w-3" />
               </a>
             </DialogTitle>
@@ -239,7 +242,7 @@ export default function CalendarCard({
             <iframe
               src={embedUrl}
               className="min-h-0 flex-1 rounded-lg border-0"
-              title="Book a time"
+              title={t('bookATime')}
             />
           )}
         </DialogContent>
@@ -250,33 +253,33 @@ export default function CalendarCard({
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-cal text-xl">
-              Edit Booking Card
+              {t('editBooking')}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="cal-url" className="font-medium text-sm">
-                Booking URL
+                {t('bookingUrl')}
               </Label>
               <Input
                 id="cal-url"
-                placeholder="https://cal.com/yourname or https://calendly.com/yourname"
+                placeholder={t('bookingPlaceholder')}
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 className="rounded-xl"
               />
               <p className="text-muted-foreground text-xs">
-                Supports Cal.com and Calendly links
+                {t('bookingSupports')}
               </p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="cal-title" className="font-medium text-sm">
-                Title
+                {t('title')}
               </Label>
               <Input
                 id="cal-title"
-                placeholder="Book a time"
+                placeholder={t('bookATime')}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="rounded-xl"
@@ -285,11 +288,11 @@ export default function CalendarCard({
 
             <div className="space-y-2">
               <Label htmlFor="cal-desc" className="font-medium text-sm">
-                Description
+                {t('description')}
               </Label>
               <Input
                 id="cal-desc"
-                placeholder="Schedule a meeting with me"
+                placeholder={t('scheduleMeeting')}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="rounded-xl"
@@ -301,7 +304,7 @@ export default function CalendarCard({
               disabled={isPending}
               className="w-full rounded-xl"
             >
-              {isPending ? 'Saving...' : 'Save'}
+              {isPending ? t('saving') : t('save')}
             </Button>
           </div>
         </DialogContent>
