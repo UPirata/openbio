@@ -1,3 +1,4 @@
+import { LOCALE_COOKIE, isLocale, matchLocale } from '@/i18n/config';
 import { neon } from '@neondatabase/serverless';
 import { getSessionCookie } from 'better-auth/cookies';
 import { type NextRequest, NextResponse } from 'next/server';
@@ -126,6 +127,33 @@ function rewriteToProfile(request: NextRequest, slug: string) {
 }
 
 export async function proxy(request: NextRequest) {
+  const response = await route(request);
+  return withDetectedLocale(request, response);
+}
+
+/**
+ * First visit: remember the language detected from the browser's
+ * Accept-Language header so it stays stable across pages. A manual choice
+ * from the language switcher overwrites this cookie and always wins.
+ */
+function withDetectedLocale(request: NextRequest, response: NextResponse) {
+  const pathname = request.nextUrl.pathname;
+  if (
+    isLocale(request.cookies.get(LOCALE_COOKIE)?.value) ||
+    isUnder(pathname, '/api') ||
+    isUnder(pathname, '/trpc')
+  ) {
+    return response;
+  }
+  response.cookies.set(
+    LOCALE_COOKIE,
+    matchLocale(request.headers.get('accept-language')),
+    { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: 'lax' }
+  );
+  return response;
+}
+
+async function route(request: NextRequest) {
   const hostname = request.headers.get('host') ?? request.nextUrl.hostname;
   const pathname = request.nextUrl.pathname;
 

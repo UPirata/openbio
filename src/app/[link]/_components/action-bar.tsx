@@ -33,6 +33,7 @@ import {
   Type,
   Undo2,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import NextLink from 'next/link';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
@@ -71,6 +72,7 @@ function suggestionToCards(cards: SuggestedCard[]): CardFields[] {
 
 export default function ActionBar() {
   const { preview } = usePreview();
+  const t = useTranslations('editor');
   const { pushSnapshot, canUndo, canRedo, undo, redo } = useBentoHistory();
   const { link } = useParams<{ link: string }>();
   const queryClient = api.useContext();
@@ -84,7 +86,7 @@ export default function ActionBar() {
     },
     onError: (err) => {
       toast({
-        title: "Couldn't update your profile",
+        title: t('updateProfileError'),
         description: getErrorMessage(err),
         variant: 'destructive',
       });
@@ -119,8 +121,8 @@ export default function ActionBar() {
         queryClient.profileLink.getByLink.setData({ link }, context.previous);
       }
       toast({
-        title: "Couldn't add this card",
-        description: 'Please try again.',
+        title: t('addCardError'),
+        description: t('tryAgain'),
         variant: 'destructive',
       });
     },
@@ -154,8 +156,8 @@ export default function ActionBar() {
           <NextLink
             href="/app"
             className={btnClass}
-            title="Back to dashboard"
-            aria-label="Back to dashboard"
+            title={t('backToDashboard')}
+            aria-label={t('backToDashboard')}
           >
             <ArrowLeft size={14} />
           </NextLink>
@@ -165,20 +167,20 @@ export default function ActionBar() {
           <button
             type="button"
             className={btnClass}
-            title="Undo (Ctrl+Z)"
+            title={t('undoHint')}
             disabled={!canUndo}
             onClick={undo}
-            aria-label="Undo"
+            aria-label={t('undo')}
           >
             <Undo2 size={14} />
           </button>
           <button
             type="button"
             className={btnClass}
-            title="Redo (Ctrl+Shift+Z)"
+            title={t('redoHint')}
             disabled={!canRedo}
             onClick={redo}
-            aria-label="Redo"
+            aria-label={t('redo')}
           >
             <Redo2 size={14} />
           </button>
@@ -190,9 +192,9 @@ export default function ActionBar() {
               <button
                 type="button"
                 className={btnClass}
-                title="Add card"
+                title={t('addCard')}
                 data-tour="add-card"
-                aria-label="Add card"
+                aria-label={t('addCard')}
               >
                 <Plus size={14} />
               </button>
@@ -207,7 +209,7 @@ export default function ActionBar() {
                 }}
               >
                 <Link size={14} className="shrink-0" />
-                Link
+                {t('cardTypes.link')}
               </button>
               <button
                 type="button"
@@ -221,7 +223,7 @@ export default function ActionBar() {
                 }
               >
                 <Type size={14} className="shrink-0" />
-                Note
+                {t('cardTypes.note')}
               </button>
               <button
                 type="button"
@@ -235,7 +237,7 @@ export default function ActionBar() {
                 }
               >
                 <ImagePlus size={14} className="shrink-0" />
-                Image
+                {t('cardTypes.image')}
               </button>
               <button
                 type="button"
@@ -250,7 +252,7 @@ export default function ActionBar() {
                 }
               >
                 <MapPin size={14} className="shrink-0" />
-                Map
+                {t('cardTypes.map')}
               </button>
               <button
                 type="button"
@@ -264,7 +266,7 @@ export default function ActionBar() {
                 }
               >
                 <FaGithub size={14} className="shrink-0" />
-                GitHub
+                {t('cardTypes.github')}
               </button>
               <button
                 type="button"
@@ -277,7 +279,7 @@ export default function ActionBar() {
                 }
               >
                 <Mail size={14} className="shrink-0" />
-                Email Collect
+                {t('cardTypes.emailCollect')}
               </button>
               <button
                 type="button"
@@ -292,7 +294,7 @@ export default function ActionBar() {
                 }
               >
                 <Timer size={14} className="shrink-0" />
-                Countdown
+                {t('cardTypes.countdown')}
               </button>
               <button
                 type="button"
@@ -307,7 +309,7 @@ export default function ActionBar() {
                 }
               >
                 <CloudSun size={14} className="shrink-0" />
-                Weather
+                {t('cardTypes.weather')}
               </button>
               <button
                 type="button"
@@ -321,7 +323,7 @@ export default function ActionBar() {
                 }
               >
                 <FaXTwitter size={14} className="shrink-0" />
-                Tweet
+                {t('cardTypes.tweet')}
               </button>
               <button
                 type="button"
@@ -335,7 +337,7 @@ export default function ActionBar() {
                 }
               >
                 <Calendar size={14} className="shrink-0" />
-                Booking
+                {t('cardTypes.booking')}
               </button>
               <button
                 type="button"
@@ -349,7 +351,7 @@ export default function ActionBar() {
                 }
               >
                 <Music size={14} className="shrink-0" />
-                Music
+                {t('cardTypes.music')}
               </button>
               {!profileLink?.bento.some((b) => b.type === 'views') && (
                 <button
@@ -363,7 +365,7 @@ export default function ActionBar() {
                   }
                 >
                   <Eye size={14} className="shrink-0" />
-                  Profile Views
+                  {t('cardTypes.profileViews')}
                 </button>
               )}
             </PopoverContent>
@@ -374,7 +376,7 @@ export default function ActionBar() {
               type="button"
               className={btnClass}
               data-tour="theme-settings"
-              aria-label="Theme settings"
+              aria-label={t('themeSettings')}
             >
               <Palette size={14} />
             </button>
@@ -384,8 +386,8 @@ export default function ActionBar() {
             <button
               type="button"
               className={btnClass}
-              title="Custom domain"
-              aria-label="Custom domain"
+              title={t('customDomain')}
+              aria-label={t('customDomain')}
             >
               <Globe size={14} />
             </button>
@@ -396,11 +398,11 @@ export default function ActionBar() {
             className={btnClass}
             title={
               profileLink?.isPublic
-                ? 'Listed on Explore (click to hide)'
-                : 'Hidden from Explore (click to show)'
+                ? t('listedOnExplore')
+                : t('hiddenFromExplore')
             }
             aria-label={
-              profileLink?.isPublic ? 'Hide from Explore' : 'Show on Explore'
+              profileLink?.isPublic ? t('hideFromExplore') : t('showOnExplore')
             }
             aria-pressed={!!profileLink?.isPublic}
             onClick={() => {
@@ -442,8 +444,8 @@ export default function ActionBar() {
             <button
               type="button"
               className={`${btnClass} text-violet-500`}
-              title="AI Profile Builder"
-              aria-label="AI profile builder"
+              title={t('aiProfileBuilder')}
+              aria-label={t('aiProfileBuilder')}
             >
               <Sparkles size={14} />
             </button>

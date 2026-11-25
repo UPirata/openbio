@@ -24,6 +24,7 @@ import { toast } from '@/components/ui/use-toast';
 import { QRCodeSVG, getQRAsCanvas } from '@/lib/qr';
 import { cn } from '@/lib/utils';
 import { Check, CircleHelp, Copy, Crown, Download } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import type React from 'react';
 import { useRef, useState } from 'react';
@@ -52,6 +53,8 @@ export default function LinkQRModal({
   linkSlug?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const t = useTranslations('qr');
+  const tc = useTranslations('common');
   const [showUpgradePopover, setShowUpgradePopover] = useState(false);
 
   const params = useParams<{ link: string }>();
@@ -90,13 +93,13 @@ export default function LinkQRModal({
         JSON.stringify({ fgColor, showLogo })
       );
       toast({
-        title: 'Saved',
-        description: 'This QR code style is remembered on this device.',
+        title: t('saved'),
+        description: t('savedDesc'),
       });
     } catch {
       toast({
-        title: "Couldn't save",
-        description: 'Your browser is blocking storage for this site.',
+        title: t('saveError'),
+        description: t('storageBlocked'),
         variant: 'destructive',
       });
     }
@@ -139,8 +142,8 @@ export default function LinkQRModal({
       downloadRef.current.click();
       URL.revokeObjectURL(url);
       toast({
-        title: 'Downloaded!',
-        description: 'QR code saved as PNG.',
+        title: t('downloaded'),
+        description: t('downloadedDesc'),
       });
     });
   };
@@ -167,13 +170,13 @@ export default function LinkQRModal({
           new ClipboardItem({ 'image/png': blob }),
         ]);
         toast({
-          title: 'Copied!',
-          description: 'QR code copied to clipboard.',
+          title: t('copied'),
+          description: t('copiedDesc'),
         });
       } catch {
         toast({
-          title: "Couldn't copy",
-          description: 'Your browser blocked it. Download the PNG instead.',
+          title: t('copyError'),
+          description: t('copyBlocked'),
           variant: 'destructive',
         });
       }
@@ -205,7 +208,9 @@ export default function LinkQRModal({
         <TooltipProvider>
           <DialogHeader>
             <div className="flex items-center gap-2">
-              <DialogTitle className="font-cal text-xl">QR Code</DialogTitle>
+              <DialogTitle className="font-cal text-xl">
+                {t('title')}
+              </DialogTitle>
               <span className="inline-flex items-center gap-1 rounded-md border border-border bg-muted px-2 py-0.5 font-medium text-muted-foreground text-xs">
                 <Crown className="h-3 w-3" />
                 PRO
@@ -218,15 +223,13 @@ export default function LinkQRModal({
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-medium text-sm">QR Code Preview</span>
+                  <span className="font-medium text-sm">{t('preview')}</span>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <CircleHelp className="h-3.5 w-3.5 text-muted-foreground" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>
-                        This QR code links to your profile at openbio.app/{link}
-                      </p>
+                      <p>{t('linksTo', { link })}</p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -236,8 +239,8 @@ export default function LinkQRModal({
                     size="icon"
                     className="h-8 w-8 text-muted-foreground hover:text-foreground"
                     onClick={downloadQR}
-                    title="Download PNG"
-                    aria-label="Download QR code as PNG"
+                    title={t('downloadPng')}
+                    aria-label={t('downloadPngLabel')}
                   >
                     <Download className="h-4 w-4" />
                   </Button>
@@ -246,8 +249,8 @@ export default function LinkQRModal({
                     size="icon"
                     className="h-8 w-8 text-muted-foreground hover:text-foreground"
                     onClick={copyToClipboard}
-                    title="Copy image"
-                    aria-label="Copy QR code image"
+                    title={t('copyImage')}
+                    aria-label={t('copyImageLabel')}
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
@@ -265,13 +268,13 @@ export default function LinkQRModal({
             {/* Logo Toggle */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <span className="font-medium text-sm">Logo</span>
+                <span className="font-medium text-sm">{t('logo')}</span>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <CircleHelp className="h-3.5 w-3.5 text-muted-foreground" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Show the OpenBio logo in the center of the QR code</p>
+                    <p>{t('logoHelp')}</p>
                   </TooltipContent>
                 </Tooltip>
               </div>
@@ -279,17 +282,14 @@ export default function LinkQRModal({
                 <Switch
                   checked={showLogo}
                   onCheckedChange={handleLogoToggle}
-                  aria-label="Show the OpenBio logo in the QR code"
+                  aria-label={t('logoLabel')}
                 />
                 {showLogo && (
                   <Crown className="pointer-events-none absolute top-0.75 right-0.75 h-3.5 w-3.5 text-blue-500/30" />
                 )}
                 {showUpgradePopover && (
                   <div className="absolute top-full right-0 z-50 mt-2 w-64 rounded-xl border border-border bg-popover p-4 text-center shadow-md">
-                    <p className="text-sm">
-                      Removing the OpenBio logo from your QR code is a Pro
-                      feature.
-                    </p>
+                    <p className="text-sm">{t('logoPro')}</p>
                     <Button
                       className="mt-3 w-full rounded-xl"
                       onClick={() => {
@@ -297,14 +297,14 @@ export default function LinkQRModal({
                         window.location.href = '/app?tab=settings';
                       }}
                     >
-                      Upgrade to Pro
+                      {t('upgradeToPro')}
                     </Button>
                     <Button
                       variant="ghost"
                       className="mt-1 w-full rounded-xl"
                       onClick={() => setShowUpgradePopover(false)}
                     >
-                      Not now
+                      {t('notNow')}
                     </Button>
                   </div>
                 )}
@@ -313,14 +313,14 @@ export default function LinkQRModal({
 
             {/* QR Code Color */}
             <div className="space-y-3">
-              <span className="font-medium text-sm">QR Code Color</span>
+              <span className="font-medium text-sm">{t('color')}</span>
               <div className="flex items-center gap-3">
                 <Popover>
                   <PopoverTrigger asChild>
                     <button
                       type="button"
                       className="flex shrink-0 items-center overflow-hidden rounded-lg border border-border transition-colors hover:border-foreground/30"
-                      aria-label="Choose a custom QR code colour"
+                      aria-label={t('chooseColor')}
                     >
                       <div
                         className="h-9 w-10 shrink-0"
@@ -355,7 +355,7 @@ export default function LinkQRModal({
                         key={color}
                         type="button"
                         onClick={() => setFgColor(color)}
-                        aria-label={`Use colour ${color}`}
+                        aria-label={t('useColour', { color })}
                         aria-pressed={isSelected}
                         className={cn(
                           'relative flex h-8 w-8 items-center justify-center rounded-full transition-all',
@@ -390,7 +390,7 @@ export default function LinkQRModal({
                 className="rounded-xl px-6"
                 onClick={() => setOpen(false)}
               >
-                Close
+                {tc('close')}
               </Button>
               <Button
                 className="rounded-xl px-6"
@@ -399,7 +399,7 @@ export default function LinkQRModal({
                   setOpen(false);
                 }}
               >
-                Save style
+                {t('saveStyle')}
               </Button>
             </div>
           </div>

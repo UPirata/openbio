@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { toast } from '@/components/ui/use-toast';
 import { api } from '@/trpc/react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 export default function EmailDigestToggle({
@@ -12,15 +13,14 @@ export default function EmailDigestToggle({
   defaultEnabled: boolean;
 }) {
   const [enabled, setEnabled] = useState(defaultEnabled);
+  const t = useTranslations('settings');
 
   const { mutate } = api.user.updateEmailDigest.useMutation({
     onSuccess: (data) => {
       setEnabled(data.emailDigest);
       toast({
-        title: data.emailDigest ? 'Digest enabled' : 'Digest disabled',
-        description: data.emailDigest
-          ? 'You will receive weekly analytics emails.'
-          : 'You will no longer receive digest emails.',
+        title: data.emailDigest ? t('digestEnabled') : t('digestDisabled'),
+        description: data.emailDigest ? t('digestOn') : t('digestOff'),
       });
     },
   });
@@ -28,11 +28,8 @@ export default function EmailDigestToggle({
   return (
     <div className="flex items-center justify-between">
       <div className="space-y-0.5">
-        <Label htmlFor="email-digest">Weekly analytics digest</Label>
-        <p className="text-muted-foreground text-xs">
-          Receive a weekly summary of your profile views, clicks, and
-          subscribers.
-        </p>
+        <Label htmlFor="email-digest">{t('digestLabel')}</Label>
+        <p className="text-muted-foreground text-xs">{t('digestHelp')}</p>
       </div>
       <Switch
         id="email-digest"

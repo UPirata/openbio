@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import { api } from '@/trpc/react';
 import type { MapBentoSchema } from '@/types';
 import { Locate, MapPin, Pencil } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import type * as z from 'zod';
@@ -106,6 +107,7 @@ function AvatarPin({
   image?: string | null;
   name?: string;
 }) {
+  const t = useTranslations('cards');
   const initial = name?.charAt(0)?.toUpperCase() ?? '?';
 
   return (
@@ -115,7 +117,7 @@ function AvatarPin({
           {image ? (
             <Image
               src={image}
-              alt={name ?? 'Avatar'}
+              alt={name ?? t('avatar')}
               width={40}
               height={40}
               className="h-full w-full object-cover"
@@ -221,10 +223,13 @@ function MapDisplay({
 }
 
 function EmptyMapState({ editable }: { editable?: boolean }) {
+  const t = useTranslations('cards');
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-[#1a1a2e]">
       <MapPin className="h-8 w-8 text-white/20" />
-      <p className="text-white/40 text-xs">{editable ? 'Set location' : ''}</p>
+      <p className="text-white/40 text-xs">
+        {editable ? t('setLocation') : ''}
+      </p>
     </div>
   );
 }
@@ -236,6 +241,7 @@ export default function MapCard({
   bento: BentoData;
   editable?: boolean;
 }) {
+  const t = useTranslations('cards');
   const params = useParams<{ link: string }>();
   const [editOpen, setEditOpen] = useState(false);
   const [latitude, setLatitude] = useState(String(bento.latitude || ''));
@@ -252,8 +258,8 @@ export default function MapCard({
   const handleUseMyLocation = useCallback(() => {
     if (!navigator.geolocation) {
       toast({
-        title: 'Geolocation not supported',
-        description: 'Your browser does not support geolocation.',
+        title: t('geoUnsupported'),
+        description: t('geoUnsupportedDesc'),
       });
       return;
     }
@@ -264,25 +270,25 @@ export default function MapCard({
         setLongitude(String(position.coords.longitude));
         setLocating(false);
         toast({
-          title: 'Location updated',
-          description: 'Coordinates have been filled in.',
+          title: t('locationUpdated'),
+          description: t('coordsFilled'),
         });
       },
       (err) => {
         setLocating(false);
         const msgs: Record<number, string> = {
-          1: 'Permission denied. Go to browser settings to allow location for this site.',
-          2: 'Position unavailable. Try again or enter coordinates manually.',
-          3: 'Request timed out. Try again.',
+          1: t('geoDenied'),
+          2: t('geoUnavailable'),
+          3: t('geoTimeout'),
         };
         toast({
-          title: 'Could not get location',
-          description: msgs[err.code] ?? 'Unknown error.',
+          title: t('geoFailed'),
+          description: msgs[err.code] ?? t('unknownError'),
         });
       },
       { enableHighAccuracy: false, timeout: 10000 }
     );
-  }, []);
+  }, [t]);
 
   const handleSave = async () => {
     const lat = Number.parseFloat(latitude);
@@ -338,7 +344,7 @@ export default function MapCard({
         {editable && (
           <button
             type="button"
-            aria-label="Edit card"
+            aria-label={t('editCard')}
             className="absolute top-3 right-3 z-50 cursor-pointer rounded-lg border border-border/50 bg-background/90 p-1.5 text-muted-foreground opacity-0 shadow-md backdrop-blur-sm transition-all hover:bg-accent hover:text-accent-foreground focus-visible:opacity-100 group-hover:opacity-100"
             onPointerDown={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
@@ -355,7 +361,9 @@ export default function MapCard({
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="font-cal text-xl">Edit Map</DialogTitle>
+            <DialogTitle className="font-cal text-xl">
+              {t('editMap')}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             {latitude &&
@@ -381,13 +389,13 @@ export default function MapCard({
               onClick={handleUseMyLocation}
             >
               <Locate className="mr-2 h-4 w-4" />
-              {locating ? 'Getting location...' : 'Use my location'}
+              {locating ? t('gettingLocation') : t('useMyLocation')}
             </Button>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label htmlFor="lat" className="font-medium text-sm">
-                  Latitude
+                  {t('latitude')}
                 </Label>
                 <Input
                   id="lat"
@@ -399,7 +407,7 @@ export default function MapCard({
               </div>
               <div className="space-y-2">
                 <Label htmlFor="lng" className="font-medium text-sm">
-                  Longitude
+                  {t('longitude')}
                 </Label>
                 <Input
                   id="lng"
@@ -413,7 +421,7 @@ export default function MapCard({
 
             <div className="space-y-2">
               <Label htmlFor="map-label" className="font-medium text-sm">
-                Label
+                {t('label')}
               </Label>
               <Input
                 id="map-label"
@@ -429,7 +437,7 @@ export default function MapCard({
               disabled={isPending}
               className="w-full rounded-xl"
             >
-              {isPending ? 'Saving...' : 'Save'}
+              {isPending ? t('saving') : t('save')}
             </Button>
           </div>
         </DialogContent>

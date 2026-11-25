@@ -10,6 +10,7 @@ import { toast } from '@/components/ui/use-toast';
 import type { BentoSchema } from '@/server/db';
 import { api } from '@/trpc/react';
 import { Copy } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import type * as z from 'zod';
 
@@ -18,6 +19,7 @@ export default function DuplicateButton({
 }: {
   bento: z.infer<typeof BentoSchema>;
 }) {
+  const t = useTranslations('cards');
   const { link } = useParams<{ link: string }>();
   const { pushSnapshot } = useBentoHistory();
 
@@ -45,8 +47,8 @@ export default function DuplicateButton({
         queryClient.profileLink.getByLink.setData({ link }, context.previous);
       }
       toast({
-        title: "Couldn't duplicate this card",
-        description: 'Please try again.',
+        title: t('duplicateCardError'),
+        description: t('tryAgain'),
         variant: 'destructive',
       });
     },
@@ -70,13 +72,13 @@ export default function DuplicateButton({
               },
             });
           }}
-          aria-label="Duplicate card"
+          aria-label={t('duplicateCard')}
         >
           <Copy className="h-3.5 w-3.5" />
         </button>
       </TooltipTrigger>
       <TooltipContent side="bottom" className="text-xs">
-        Duplicate
+        {t('duplicate')}
       </TooltipContent>
     </Tooltip>
   );

@@ -10,6 +10,8 @@ import { TailwindIndicator } from '@/components/tailwind-indicator';
 import { Toaster } from '@/components/ui/toaster';
 import { Analytics } from '@vercel/analytics/react';
 import type { Metadata, Viewport } from 'next';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale } from 'next-intl/server';
 import { Geist } from 'next/font/google';
 import LocalFont from 'next/font/local';
 import type { ReactNode } from 'react';
@@ -42,17 +44,21 @@ export const viewport: Viewport = {
   // pinch-zooming.
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: ReactNode;
 }) {
+  const locale = await getLocale();
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body className={`${geist.variable} ${calSans.variable} font-sans`}>
         <Background />
 
-        <ClientProviders>{children}</ClientProviders>
+        <NextIntlClientProvider>
+          <ClientProviders>{children}</ClientProviders>
+        </NextIntlClientProvider>
 
         <Toaster />
         <TailwindIndicator />

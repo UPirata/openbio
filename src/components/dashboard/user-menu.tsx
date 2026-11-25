@@ -10,6 +10,7 @@ import {
 import { signOut, useSession } from '@/lib/auth-client';
 import { api } from '@/trpc/react';
 import { LogOut, Settings, ShieldCheck } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 
 export function UserMenu() {
@@ -19,6 +20,7 @@ export function UserMenu() {
     retry: false,
   });
   const router = useRouter();
+  const t = useTranslations('dashboard');
 
   const handleSignOut = async () => {
     await signOut();
@@ -30,7 +32,7 @@ export function UserMenu() {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          aria-label="Account menu"
+          aria-label={t('accountMenu')}
           className="rounded-full outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Avatar className="h-9 w-9 cursor-pointer transition-transform hover:scale-105">
@@ -48,7 +50,7 @@ export function UserMenu() {
             className="cursor-pointer gap-x-2 rounded-lg"
           >
             <ShieldCheck className="h-4 w-4" />
-            Admin panel
+            {t('adminPanel')}
           </DropdownMenuItem>
         ) : null}
         <DropdownMenuItem
@@ -56,14 +58,14 @@ export function UserMenu() {
           className="cursor-pointer gap-x-2 rounded-lg"
         >
           <Settings className="h-4 w-4" />
-          Settings
+          {t('settings')}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={handleSignOut}
           className="cursor-pointer gap-x-2 rounded-lg text-destructive"
         >
           <LogOut className="h-4 w-4" />
-          Sign out
+          {t('signOut')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

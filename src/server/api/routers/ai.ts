@@ -1,3 +1,4 @@
+import { isLocale, localeEnglishNames } from '@/i18n/config';
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 import {
   consumeAiCredits,
@@ -6,6 +7,7 @@ import {
 } from '@/server/db/utils/ai-credits';
 import { TRPCError } from '@trpc/server';
 import { generateText } from 'ai';
+import { getLocale } from 'next-intl/server';
 import * as z from 'zod';
 
 const MODEL = 'openai/gpt-5.4-mini';
@@ -117,6 +119,11 @@ ${extraContext}`,
         });
       }
 
+      const locale = await getLocale().catch(() => 'en');
+      const language = isLocale(locale)
+        ? localeEnglishNames[locale]
+        : 'English';
+
       return generateOrRefund(ctx.user.id, 3, async () => {
         const { text } = await generateText({
           model: MODEL,
@@ -130,7 +137,8 @@ Return a JSON object with:
   - "value": the URL or content to use (or empty string if user needs to fill in)
 
 Suggest 3-6 cards that make sense for the person described.
-Return ONLY valid JSON, no markdown or explanation.`,
+Return ONLY valid JSON, no markdown or explanation.
+Write the bio and card titles in ${language}; keep the JSON keys and type values in English.`,
           prompt: `Build a profile for: ${input.name}
 Description: ${input.description}`,
         });

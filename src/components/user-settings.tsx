@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { auth } from '@/lib/auth';
 import type { RouterOutputs } from '@/trpc/react';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { headers } from 'next/headers';
 
 export default async function UserSettings({
@@ -16,12 +17,15 @@ export default async function UserSettings({
   user: NonNullable<RouterOutputs['user']['me']>;
 }) {
   const session = await auth.api.getSession({ headers: await headers() });
+  const t = await getTranslations('settings');
+  const tp = await getTranslations('pricing');
+  const locale = await getLocale();
 
   return (
     <div className="flex w-full flex-col gap-y-6">
       <div className="flex flex-col gap-y-6 rounded-lg border border-border bg-background px-4 py-4 md:px-6 md:py-6">
         <div className="space-y-2">
-          <Label>Your Avatar</Label>
+          <Label>{t('avatar')}</Label>
 
           <Avatar>
             <AvatarImage src={session?.user?.image ?? undefined} />
@@ -32,13 +36,13 @@ export default async function UserSettings({
         </div>
 
         <div className="space-y-2">
-          <Label>Your Email</Label>
+          <Label>{t('email')}</Label>
 
           <Input value={user.email} readOnly className="w-max" />
         </div>
 
         <div className="space-y-2">
-          <Label>Your Name</Label>
+          <Label>{t('name')}</Label>
 
           <Input value={user.name} readOnly className="w-max" />
         </div>
@@ -48,26 +52,28 @@ export default async function UserSettings({
         </div>
 
         <div className="flex flex-col space-y-2">
-          <Label>Plan</Label>
+          <Label>{t('plan')}</Label>
 
           <span className="text-sm">
-            You are currently subscribed to the{' '}
-            <Badge className="mr-1 lowercase">{user.plan}</Badge>
-            plan.
+            {t.rich('subscribedTo', {
+              plan: user.plan,
+              badge: (chunks) => (
+                <Badge className="mx-1 lowercase">{chunks}</Badge>
+              ),
+            })}
           </span>
 
           {user.plan !== 'free' && (
             <div className="flex flex-col gap-2 pt-2">
               {user.subscriptionEndsAt && (
                 <p className="text-muted-foreground text-xs">
-                  Paid through{' '}
-                  {user.subscriptionEndsAt.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
+                  {t('paidThrough', {
+                    date: user.subscriptionEndsAt.toLocaleDateString(locale, {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    }),
                   })}
-                  . Change plan, switch between monthly and annual, update your
-                  card or cancel from the billing portal.
                 </p>
               )}
               <ManageBillingButton />
@@ -79,10 +85,10 @@ export default async function UserSettings({
             className="mt-8 flex w-full flex-col items-center"
           >
             <TabsList className="w-full md:mr-auto md:w-max">
-              <TabsTrigger value="monthly">Monthly</TabsTrigger>
+              <TabsTrigger value="monthly">{tp('monthly')}</TabsTrigger>
               <TabsTrigger value="annually" className="gap-x-2">
-                Annually
-                <Badge>2 months free</Badge>
+                {tp('annually')}
+                <Badge>{tp('twoMonthsFree')}</Badge>
               </TabsTrigger>
             </TabsList>
 

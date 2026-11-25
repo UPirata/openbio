@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import { api } from '@/trpc/react';
 import type { EmailCollectBentoSchema } from '@/types';
 import { Check, Mail, Pencil, Send } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import type * as z from 'zod';
@@ -35,6 +36,7 @@ function SubscribeForm({
   linkId?: string;
   compact?: boolean;
 }) {
+  const t = useTranslations('cards');
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
@@ -44,22 +46,21 @@ function SubscribeForm({
         setSubmitted(true);
         setEmail('');
         toast({
-          title: 'Subscribed!',
-          description: 'You will receive updates from this creator.',
+          title: t('subscribed'),
+          description: t('subscribedDesc'),
         });
       },
       onError: (err) => {
         toast({
-          title: 'Error',
+          title: t('error'),
           description: getErrorMessage(err),
         });
       },
     });
 
-  const heading = bento.heading || 'Stay in touch';
-  const description =
-    bento.description || 'Get notified when I post something new.';
-  const buttonText = bento.buttonText || 'Subscribe';
+  const heading = bento.heading || t('stayInTouch');
+  const description = bento.description || t('getNotified');
+  const buttonText = bento.buttonText || t('subscribe');
 
   if (submitted) {
     return (
@@ -67,8 +68,10 @@ function SubscribeForm({
         <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
           <Check className="h-5 w-5 text-primary" />
         </div>
-        <p className="font-cal text-sm">You&apos;re subscribed!</p>
-        <p className="text-muted-foreground text-xs">Thanks for subscribing.</p>
+        <p className="font-cal text-sm">{t('youreSubscribed')}</p>
+        <p className="text-muted-foreground text-xs">
+          {t('thanksSubscribing')}
+        </p>
       </div>
     );
   }
@@ -92,7 +95,7 @@ function SubscribeForm({
           >
             <Input
               type="email"
-              aria-label="Email address"
+              aria-label={t('emailAddress')}
               placeholder="you@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -104,7 +107,7 @@ function SubscribeForm({
               size="sm"
               className="h-8 shrink-0 rounded-lg px-2"
               disabled={isPending || !linkId}
-              aria-label="Subscribe"
+              aria-label={t('subscribe')}
             >
               <Send className="h-3.5 w-3.5" />
             </Button>
@@ -134,7 +137,7 @@ function SubscribeForm({
       >
         <Input
           type="email"
-          aria-label="Email address"
+          aria-label={t('emailAddress')}
           placeholder="you@email.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -160,6 +163,7 @@ export default function EmailCollectCard({
   bento: BentoData;
   editable?: boolean;
 }) {
+  const t = useTranslations('cards');
   const params = useParams<{ link: string }>();
   const [editOpen, setEditOpen] = useState(false);
   const [heading, setHeading] = useState(bento.heading ?? '');
@@ -217,7 +221,7 @@ export default function EmailCollectCard({
         {editable && (
           <button
             type="button"
-            aria-label="Edit card"
+            aria-label={t('editCard')}
             className="absolute top-3 right-3 z-50 cursor-pointer rounded-lg border border-border/50 bg-background/90 p-1.5 text-muted-foreground opacity-0 shadow-md backdrop-blur-sm transition-all hover:bg-accent hover:text-accent-foreground focus-visible:opacity-100 group-hover:opacity-100"
             onPointerDown={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
@@ -235,17 +239,17 @@ export default function EmailCollectCard({
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-cal text-xl">
-              Edit Email Collection
+              {t('editEmailCollect')}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="ec-heading" className="font-medium text-sm">
-                Heading
+                {t('heading')}
               </Label>
               <Input
                 id="ec-heading"
-                placeholder="Stay in touch"
+                placeholder={t('stayInTouch')}
                 value={heading}
                 onChange={(e) => setHeading(e.target.value)}
                 className="rounded-xl"
@@ -254,11 +258,11 @@ export default function EmailCollectCard({
 
             <div className="space-y-2">
               <Label htmlFor="ec-desc" className="font-medium text-sm">
-                Description
+                {t('description')}
               </Label>
               <Input
                 id="ec-desc"
-                placeholder="Get notified when I post something new."
+                placeholder={t('getNotified')}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="rounded-xl"
@@ -267,11 +271,11 @@ export default function EmailCollectCard({
 
             <div className="space-y-2">
               <Label htmlFor="ec-btn" className="font-medium text-sm">
-                Button Text
+                {t('buttonText')}
               </Label>
               <Input
                 id="ec-btn"
-                placeholder="Subscribe"
+                placeholder={t('subscribe')}
                 value={buttonText}
                 onChange={(e) => setButtonText(e.target.value)}
                 className="rounded-xl"
@@ -283,7 +287,7 @@ export default function EmailCollectCard({
               disabled={isSaving}
               className="w-full rounded-xl"
             >
-              {isSaving ? 'Saving...' : 'Save'}
+              {isSaving ? t('saving') : t('save')}
             </Button>
           </div>
         </DialogContent>

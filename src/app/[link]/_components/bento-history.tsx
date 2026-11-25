@@ -3,6 +3,7 @@
 import { toast } from '@/components/ui/use-toast';
 import { api } from '@/trpc/react';
 import type { BentoSchema } from '@/types';
+import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import {
   createContext,
@@ -54,6 +55,7 @@ export function BentoHistoryProvider({
     { link },
     { staleTime: 60_000 }
   );
+  const t = useTranslations('editor');
   const utils = api.useUtils();
   const { mutateAsync: setBento } = api.profileLink.setBento.useMutation();
   const isOwner = !!profileLink?.isOwner;
@@ -81,15 +83,15 @@ export function BentoHistoryProvider({
     } catch {
       pendingSave.current = null;
       toast({
-        title: "Couldn't save",
-        description: 'That change was not saved, so the saved layout is back.',
+        title: t('saveError'),
+        description: t('saveErrorDesc'),
         variant: 'destructive',
       });
       await utils.profileLink.getByLink.invalidate({ link });
     } finally {
       saving.current = false;
     }
-  }, [link, setBento, utils]);
+  }, [link, setBento, utils, t]);
 
   const getCurrentBento = useCallback((): BentoSnapshot => {
     return structuredClone(

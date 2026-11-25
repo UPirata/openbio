@@ -15,6 +15,7 @@ import {
   Sparkles,
   Underline as UnderlineIcon,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export default function BioToolbar({
   editor,
@@ -27,11 +28,12 @@ export default function BioToolbar({
   name: string;
   links?: string[];
 }) {
+  const t = useTranslations('editor');
   const proAction = (action: () => void) => {
     if (!isPremium) {
       toast({
-        title: 'Pro feature',
-        description: 'Upgrade to Pro to unlock advanced bio styling.',
+        title: t('proFeature'),
+        description: t('proBioStyling'),
       });
       return;
     }
@@ -96,7 +98,7 @@ export default function BioToolbar({
         className={proBtnClass}
         onClick={() =>
           proAction(() => {
-            const url = window.prompt('Enter URL:');
+            const url = window.prompt(t('enterUrl'));
             if (url) {
               editor.chain().focus().setLink({ href: url }).run();
             }
@@ -121,7 +123,7 @@ export default function BioToolbar({
         className={proBtnClass}
         onClick={() =>
           proAction(() => {
-            const color = window.prompt('Enter color hex (e.g. #ff0000):');
+            const color = window.prompt(t('enterColor'));
             if (color) {
               editor.chain().focus().setColor(color).run();
             }

@@ -14,13 +14,14 @@ import { toast } from '@/components/ui/use-toast';
 import { api } from '@/trpc/react';
 import { useCompletion } from '@ai-sdk/react';
 import { Loader2, Sparkles, Wand2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { type ReactNode, useState } from 'react';
 
 const TONES = [
-  { value: 'casual', label: 'Casual' },
-  { value: 'professional', label: 'Professional' },
-  { value: 'creative', label: 'Creative' },
-  { value: 'minimal', label: 'Minimal' },
+  { value: 'casual' },
+  { value: 'professional' },
+  { value: 'creative' },
+  { value: 'minimal' },
 ] as const;
 
 export default function BioWriter({
@@ -35,6 +36,8 @@ export default function BioWriter({
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const tr = useTranslations('ai');
+  const tc = useTranslations('common');
   const [tone, setTone] = useState<(typeof TONES)[number]['value']>('casual');
   const [context, setContext] = useState('');
 
@@ -46,7 +49,7 @@ export default function BioWriter({
     api: '/api/ai/generate',
     onError: (err) => {
       toast({
-        title: 'Error',
+        title: tc('error'),
         description: err.message,
         variant: 'destructive',
       });
@@ -63,8 +66,8 @@ export default function BioWriter({
     onGenerated(completion);
     setOpen(false);
     toast({
-      title: 'Bio updated!',
-      description: 'Your AI-generated bio has been applied.',
+      title: tr('bioUpdated'),
+      description: tr('bioUpdatedDesc'),
     });
   };
 
@@ -75,19 +78,22 @@ export default function BioWriter({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 font-cal text-xl">
             <Sparkles className="h-4 w-4 text-violet-500" />
-            AI Bio Writer
+            {tr('bioWriter')}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           {credits && (
             <p className="text-muted-foreground text-xs">
-              {credits.remaining}/{credits.limit} credits remaining
+              {tr('creditsRemaining', {
+                remaining: credits.remaining,
+                limit: credits.limit,
+              })}
             </p>
           )}
 
           <div className="space-y-2">
-            <Label className="font-medium text-sm">Tone</Label>
+            <Label className="font-medium text-sm">{tr('tone')}</Label>
             <div className="flex gap-2">
               {TONES.map((t) => (
                 <button
@@ -100,7 +106,7 @@ export default function BioWriter({
                       : 'bg-muted text-muted-foreground hover:bg-accent'
                   }`}
                 >
-                  {t.label}
+                  {tr(`tones.${t.value}`)}
                 </button>
               ))}
             </div>
@@ -108,14 +114,14 @@ export default function BioWriter({
 
           <div className="space-y-2">
             <Label htmlFor="ai-context" className="font-medium text-sm">
-              Tell us about yourself{' '}
+              {tr('aboutYou')}{' '}
               <span className="font-normal text-muted-foreground">
-                (optional)
+                {tr('optional')}
               </span>
             </Label>
             <Input
               id="ai-context"
-              placeholder="e.g. developer, photographer, based in NYC..."
+              placeholder={tr('contextPlaceholder')}
               value={context}
               onChange={(e) => setContext(e.target.value)}
               className="rounded-xl"
@@ -132,7 +138,7 @@ export default function BioWriter({
             ) : (
               <Wand2 className="mr-2 h-4 w-4" />
             )}
-            {isLoading ? 'Generating...' : 'Generate Bio (1 credit)'}
+            {isLoading ? tr('generating') : tr('generateBio')}
           </Button>
 
           {completion && (
@@ -147,14 +153,14 @@ export default function BioWriter({
                   onClick={handleGenerate}
                   disabled={isLoading}
                 >
-                  Regenerate
+                  {tr('regenerate')}
                 </Button>
                 <Button
                   className="flex-1 rounded-xl"
                   onClick={handleApply}
                   disabled={isLoading}
                 >
-                  Apply
+                  {tr('apply')}
                 </Button>
               </div>
             </div>

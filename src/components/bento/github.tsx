@@ -16,6 +16,7 @@ import { useSaveBento } from '@/hooks/use-save-bento';
 import { cn } from '@/lib/utils';
 import type { GithubBentoSchema } from '@/types';
 import { Pencil } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { FaGithub } from 'react-icons/fa';
 import type * as z from 'zod';
@@ -119,6 +120,7 @@ function CompactGitHub({
   username,
   stats,
 }: { username: string; stats: GitHubStats | null }) {
+  const t = useTranslations('cards');
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-4 text-center">
       {stats?.avatar ? (
@@ -147,13 +149,13 @@ function CompactGitHub({
         <div className="flex items-center gap-4 text-xs">
           <div className="text-center">
             <span className="font-cal text-foreground">{stats.followers}</span>
-            <span className="ml-1 text-muted-foreground">followers</span>
+            <span className="ml-1 text-muted-foreground">{t('followers')}</span>
           </div>
           <div className="text-center">
             <span className="font-cal text-foreground">
               {stats.publicRepos}
             </span>
-            <span className="ml-1 text-muted-foreground">repos</span>
+            <span className="ml-1 text-muted-foreground">{t('repos')}</span>
           </div>
         </div>
       )}
@@ -205,6 +207,7 @@ function LargeGitHub({
   username,
   stats,
 }: { username: string; stats: GitHubStats | null }) {
+  const t = useTranslations('cards');
   return (
     <div className="flex h-full w-full flex-col overflow-hidden rounded-2xl p-5">
       {/* Header */}
@@ -245,19 +248,25 @@ function LargeGitHub({
             <span className="font-cal text-lg">
               {stats.publicRepos.toLocaleString()}
             </span>
-            <span className="text-[11px] text-muted-foreground">Repos</span>
+            <span className="text-[11px] text-muted-foreground">
+              {t('Repos')}
+            </span>
           </div>
           <div className="flex flex-col items-center gap-1 rounded-xl border border-border/40 bg-muted/20 py-3">
             <span className="font-cal text-lg">
               {stats.followers.toLocaleString()}
             </span>
-            <span className="text-[11px] text-muted-foreground">Followers</span>
+            <span className="text-[11px] text-muted-foreground">
+              {t('Followers')}
+            </span>
           </div>
           <div className="flex flex-col items-center gap-1 rounded-xl border border-border/40 bg-muted/20 py-3">
             <span className="font-cal text-lg">
               {stats.stars.toLocaleString()}
             </span>
-            <span className="text-[11px] text-muted-foreground">Stars</span>
+            <span className="text-[11px] text-muted-foreground">
+              {t('stars')}
+            </span>
           </div>
         </div>
       )}
@@ -277,6 +286,7 @@ export default function GitHubCard({
   bento: BentoData;
   editable?: boolean;
 }) {
+  const t = useTranslations('cards');
   const [editOpen, setEditOpen] = useState(false);
   const [username, setUsername] = useState(bento.username || '');
   const cardSize = useCardSize(bento);
@@ -306,7 +316,7 @@ export default function GitHubCard({
         <div className="flex h-full w-full flex-col items-center justify-center gap-2 rounded-2xl bg-muted/30">
           <FaGithub className="h-8 w-8 text-muted-foreground" />
           <p className="text-muted-foreground text-xs">
-            {editable ? 'Set username' : ''}
+            {editable ? t('setUsername') : ''}
           </p>
         </div>
       );
@@ -353,7 +363,7 @@ export default function GitHubCard({
         {editable && (
           <button
             type="button"
-            aria-label="Edit card"
+            aria-label={t('editCard')}
             className="absolute top-3 right-3 z-50 cursor-pointer rounded-lg border border-border/50 bg-background/90 p-1.5 text-muted-foreground opacity-0 shadow-md backdrop-blur-sm transition-all hover:bg-accent hover:text-accent-foreground focus-visible:opacity-100 group-hover:opacity-100"
             onPointerDown={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
@@ -371,13 +381,13 @@ export default function GitHubCard({
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-cal text-xl">
-              Edit GitHub Card
+              {t('editGithub')}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="gh-username" className="font-medium text-sm">
-                GitHub Username
+                {t('githubUsername')}
               </Label>
               <Input
                 id="gh-username"
@@ -405,7 +415,7 @@ export default function GitHubCard({
               disabled={isPending}
               className="w-full rounded-xl"
             >
-              {isPending ? 'Saving...' : 'Save'}
+              {isPending ? t('saving') : t('save')}
             </Button>
           </div>
         </DialogContent>

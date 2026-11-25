@@ -26,6 +26,7 @@ import { cn } from '@/lib/utils';
 import { api } from '@/trpc/react';
 import type { LinkBentoSchema } from '@/types';
 import { Pencil } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import type React from 'react';
@@ -51,7 +52,7 @@ type PlatformInfo = {
   icon: React.ReactNode;
   color: string;
   bg: string;
-  action: { label: string; className: string };
+  action: { label: SocialAction; className: string };
 };
 
 const PLATFORM_MAP: Record<string, PlatformInfo> = {
@@ -60,7 +61,7 @@ const PLATFORM_MAP: Record<string, PlatformInfo> = {
     color: '#000000',
     bg: 'bg-foreground/5',
     action: {
-      label: 'Follow',
+      label: 'follow',
       className:
         'rounded-full bg-foreground text-background hover:bg-foreground/90',
     },
@@ -70,7 +71,7 @@ const PLATFORM_MAP: Record<string, PlatformInfo> = {
     color: '#0A66C2',
     bg: 'bg-[#0A66C2]/5',
     action: {
-      label: 'Connect',
+      label: 'connect',
       className: 'rounded-full bg-[#0A66C2] text-white hover:bg-[#004182]',
     },
   },
@@ -79,7 +80,7 @@ const PLATFORM_MAP: Record<string, PlatformInfo> = {
     color: '#333333',
     bg: 'bg-gray-500/5',
     action: {
-      label: 'Follow',
+      label: 'follow',
       className: 'rounded-full',
     },
   },
@@ -88,7 +89,7 @@ const PLATFORM_MAP: Record<string, PlatformInfo> = {
     color: '#F56040',
     bg: 'bg-[#F56040]/5',
     action: {
-      label: 'Follow',
+      label: 'follow',
       className:
         'rounded-full bg-foreground text-background hover:bg-foreground/90',
     },
@@ -98,7 +99,7 @@ const PLATFORM_MAP: Record<string, PlatformInfo> = {
     color: '#9146FF',
     bg: 'bg-[#9146FF]/5',
     action: {
-      label: 'Follow',
+      label: 'follow',
       className: 'rounded-full bg-[#9146FF] text-white hover:bg-[#7c3aed]',
     },
   },
@@ -107,7 +108,7 @@ const PLATFORM_MAP: Record<string, PlatformInfo> = {
     color: '#0088CC',
     bg: 'bg-[#0088CC]/5',
     action: {
-      label: 'Message',
+      label: 'message',
       className: 'rounded-full',
     },
   },
@@ -116,7 +117,7 @@ const PLATFORM_MAP: Record<string, PlatformInfo> = {
     color: '#5A65EA',
     bg: 'bg-[#5A65EA]/5',
     action: {
-      label: 'Join',
+      label: 'join',
       className: 'rounded-full bg-[#5A65EA] text-white hover:bg-[#4752c4]',
     },
   },
@@ -125,7 +126,7 @@ const PLATFORM_MAP: Record<string, PlatformInfo> = {
     color: '#FF0000',
     bg: 'bg-[#FF0000]/5',
     action: {
-      label: 'Subscribe',
+      label: 'subscribe',
       className: 'rounded-full bg-[#FF0000] text-white hover:bg-[#cc0000]',
     },
   },
@@ -179,6 +180,13 @@ function getDescription(url: string, metadata?: Metadata) {
   return describeLink(url).caption ?? metadata?.description ?? null;
 }
 
+type SocialAction = 'follow' | 'connect' | 'message' | 'join' | 'subscribe';
+
+function ActionLabel({ action }: { action: SocialAction }) {
+  const t = useTranslations('social');
+  return <>{t(`actions.${action}`)}</>;
+}
+
 function getAction(url: string) {
   const platform = getPlatform(url);
   if (!(platform && isFollowable(url))) {
@@ -186,7 +194,7 @@ function getAction(url: string) {
   }
   return (
     <Button size="sm" className={platform.action.className}>
-      {platform.action.label}
+      <ActionLabel action={platform.action.label} />
     </Button>
   );
 }
@@ -210,7 +218,7 @@ function ActionButton({
         variant === 'outline' ? 'rounded-full' : platform.action.className
       }
     >
-      {platform.action.label}
+      <ActionLabel action={platform.action.label} />
     </Button>
   );
 }
@@ -231,6 +239,7 @@ function CardWrapper({
   onEdit?: () => void;
 }) {
   const { link: linkSlug } = useParams<{ link: string }>();
+  const t = useTranslations('bento');
   const { data: profileLink } = api.profileLink.getByLink.useQuery(
     { link: linkSlug },
     { enabled: !editable }
@@ -268,7 +277,7 @@ function CardWrapper({
       {editable && onEdit && (
         <button
           type="button"
-          aria-label="Edit card"
+          aria-label={t('editCard')}
           className="absolute top-3 right-3 z-50 cursor-pointer rounded-lg border border-border/50 bg-background/90 p-1.5 text-muted-foreground opacity-0 shadow-md backdrop-blur-sm transition-all hover:bg-accent hover:text-accent-foreground focus-visible:opacity-100 group-hover:opacity-100"
           onPointerDown={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
@@ -464,6 +473,8 @@ export default function LinkCard({
 }) {
   const [editOpen, setEditOpen] = useState(false);
   const [href, setHref] = useState(bento.href ?? '');
+  const t = useTranslations('bento');
+  const tc = useTranslations('common');
 
   const { saveBento, isPending } = useSaveBento();
   const cardSize = useCardSize(bento);
@@ -480,8 +491,8 @@ export default function LinkCard({
     const url = toSafeUrl(href);
     if (!url) {
       toast({
-        title: 'Invalid link',
-        description: 'Enter a full link, like https://example.com.',
+        title: t('invalidLink'),
+        description: t('invalidLinkDesc'),
         variant: 'destructive',
       });
       return;
@@ -527,7 +538,9 @@ export default function LinkCard({
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="font-cal text-xl">Edit Link</DialogTitle>
+            <DialogTitle className="font-cal text-xl">
+              {t('editLink')}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
@@ -547,7 +560,7 @@ export default function LinkCard({
               disabled={isPending}
               className="w-full rounded-xl"
             >
-              {isPending ? 'Saving...' : 'Save'}
+              {isPending ? t('saving') : tc('save')}
             </Button>
           </div>
         </DialogContent>

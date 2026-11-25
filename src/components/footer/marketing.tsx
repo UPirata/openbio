@@ -1,13 +1,15 @@
+import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { BsTwitterX } from 'react-icons/bs';
 import { FaGithub } from 'react-icons/fa';
 
-export default function MarketingFooter() {
+export default async function MarketingFooter() {
+  const t = await getTranslations('footer');
   return (
     <footer className="border-border/50 border-t py-8">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4">
         <p className="text-muted-foreground text-sm">
-          Built by{' '}
+          {t('builtBy')}{' '}
           <Link
             href="https://twitter.com/vanxhh"
             target="_blank"

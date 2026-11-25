@@ -13,6 +13,7 @@ import { toast } from '@/components/ui/use-toast';
 import { getErrorMessage } from '@/lib/errors';
 import { api } from '@/trpc/react';
 import { Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { type ReactNode, useState } from 'react';
 
@@ -25,6 +26,8 @@ export function DeleteLinkDialog({
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const t = useTranslations('linkCard');
+  const tc = useTranslations('common');
   const router = useRouter();
   const utils = api.useUtils();
 
@@ -32,8 +35,8 @@ export function DeleteLinkDialog({
     onSuccess: async () => {
       setOpen(false);
       toast({
-        title: 'Page deleted',
-        description: `openbio.app/${link} has been removed.`,
+        title: t('deleted'),
+        description: t('deletedDesc', { link }),
       });
       await utils.profileLink.getAll.invalidate();
       // The dashboard list is server-rendered.
@@ -41,7 +44,7 @@ export function DeleteLinkDialog({
     },
     onError: (err) => {
       toast({
-        title: "Couldn't delete this page",
+        title: t('deleteError'),
         description: getErrorMessage(err),
         variant: 'destructive',
       });
@@ -54,15 +57,15 @@ export function DeleteLinkDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="font-cal text-xl">
-            Delete this page?
+            {t('deleteTitle')}
           </DialogTitle>
           <DialogDescription>
-            <span className="font-medium text-foreground">
-              openbio.app/{link}
-            </span>{' '}
-            will be removed along with its cards, analytics and collected
-            emails. The name becomes available for anyone to claim. This cannot
-            be undone.
+            {t.rich('deleteDesc', {
+              link,
+              b: (chunks) => (
+                <span className="font-medium text-foreground">{chunks}</span>
+              ),
+            })}
           </DialogDescription>
         </DialogHeader>
         <div className="flex items-center justify-end gap-3">
@@ -72,7 +75,7 @@ export function DeleteLinkDialog({
             onClick={() => setOpen(false)}
             disabled={isPending}
           >
-            Cancel
+            {tc('cancel')}
           </Button>
           <Button
             variant="destructive"
@@ -81,7 +84,7 @@ export function DeleteLinkDialog({
             disabled={isPending}
           >
             {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-            Delete page
+            {t('deletePage')}
           </Button>
         </div>
       </DialogContent>

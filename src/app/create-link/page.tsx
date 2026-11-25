@@ -11,6 +11,7 @@ import { getErrorMessage } from '@/lib/errors';
 import OpenBioLogo from '@/public/openbio.png';
 import { api } from '@/trpc/react';
 import { AtSign, Loader2, Sparkles } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -27,34 +28,54 @@ import {
 } from 'react-icons/fa';
 
 const SOCIALS = [
-  { key: 'twitter', name: 'X', icon: BsTwitterX, placeholder: 'username' },
-  { key: 'github', name: 'GitHub', icon: FaGithub, placeholder: 'username' },
+  {
+    key: 'twitter',
+    name: 'X',
+    icon: BsTwitterX,
+    placeholder: 'username' as const,
+  },
+  {
+    key: 'github',
+    name: 'GitHub',
+    icon: FaGithub,
+    placeholder: 'username' as const,
+  },
   {
     key: 'instagram',
     name: 'Instagram',
     icon: FaInstagram,
-    placeholder: 'username',
+    placeholder: 'username' as const,
   },
   {
     key: 'linkedin',
     name: 'LinkedIn',
     icon: FaLinkedinIn,
-    placeholder: 'username',
+    placeholder: 'username' as const,
   },
-  { key: 'youtube', name: 'YouTube', icon: FaYoutube, placeholder: 'channel' },
+  {
+    key: 'youtube',
+    name: 'YouTube',
+    icon: FaYoutube,
+    placeholder: 'channel' as const,
+  },
   {
     key: 'discord',
     name: 'Discord',
     icon: BsDiscord,
-    placeholder: 'username',
+    placeholder: 'username' as const,
   },
   {
     key: 'telegram',
     name: 'Telegram',
     icon: BiLogoTelegram,
-    placeholder: 'username',
+    placeholder: 'username' as const,
   },
-  { key: 'twitch', name: 'Twitch', icon: FaTwitch, placeholder: 'username' },
+  {
+    key: 'twitch',
+    name: 'Twitch',
+    icon: FaTwitch,
+    placeholder: 'username' as const,
+  },
 ] as const;
 
 const SOCIAL_URLS: Record<string, string> = {
@@ -80,14 +101,14 @@ const SOCIAL_COLORS: Record<string, { text: string; bg: string }> = {
 };
 
 const SOCIAL_ACTIONS: Record<string, string> = {
-  twitter: 'Follow',
-  github: 'Follow',
-  instagram: 'Follow',
-  linkedin: 'Connect',
-  youtube: 'Subscribe',
-  discord: 'Join',
-  telegram: 'Message',
-  twitch: 'Follow',
+  twitter: 'follow',
+  github: 'follow',
+  instagram: 'follow',
+  linkedin: 'connect',
+  youtube: 'subscribe',
+  discord: 'join',
+  telegram: 'message',
+  twitch: 'follow',
 };
 
 function PreviewCard({
@@ -103,7 +124,8 @@ function PreviewCard({
     text: 'text-foreground',
     bg: 'bg-muted',
   };
-  const action = SOCIAL_ACTIONS[platform] ?? 'Visit';
+  const t = useTranslations('social');
+  const action = t(`actions.${SOCIAL_ACTIONS[platform] ?? 'visit'}`);
   const url = SOCIAL_URLS[platform] ?? '';
 
   return (
@@ -132,6 +154,9 @@ export default function Page() {
   const searchParams = useSearchParams();
   const link = searchParams.get('link') ?? '';
   const router = useRouter();
+  const t = useTranslations('createLink');
+  const tAuth = useTranslations('auth');
+  const tSocial = useTranslations('social');
 
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
@@ -150,8 +175,8 @@ export default function Page() {
     if (!link) {
       // Arrived without a claimed name (a bookmarked or hand-typed URL).
       toast({
-        title: 'Pick a name first',
-        description: 'Choose the link for your page, then set it up here.',
+        title: t('pickNameFirst'),
+        description: t('pickNameFirstDesc'),
       });
       router.push('/claim-link');
       return;
@@ -170,7 +195,7 @@ export default function Page() {
       router.push(`/${link}`);
     } catch (err) {
       toast({
-        title: "Couldn't create your page",
+        title: t('createError'),
         description: getErrorMessage(err),
         variant: 'destructive',
       });
@@ -189,7 +214,7 @@ export default function Page() {
                 <Image src={OpenBioLogo} alt="OpenBio" width={36} height={36} />
               </Link>
               <div>
-                <h1 className="font-cal text-xl">Set up your page</h1>
+                <h1 className="font-cal text-xl">{t('title')}</h1>
                 <p className="text-muted-foreground text-xs">
                   openbio.app/{link}
                 </p>
@@ -200,11 +225,11 @@ export default function Page() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name" className="font-medium text-sm">
-                  Display name
+                  {tAuth('displayName')}
                 </Label>
                 <Input
                   id="name"
-                  placeholder="John Doe"
+                  placeholder={tAuth('namePlaceholder')}
                   className="rounded-xl"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -214,7 +239,7 @@ export default function Page() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="bio" className="font-medium text-sm">
-                    Bio
+                    {t('bio')}
                   </Label>
                   <BioWriter
                     name={name || link}
@@ -230,14 +255,14 @@ export default function Page() {
                       className="h-7 gap-1 text-violet-500 text-xs"
                     >
                       <Sparkles className="h-3 w-3" />
-                      Write with AI
+                      {t('writeWithAI')}
                     </Button>
                   </BioWriter>
                 </div>
                 <textarea
                   id="bio"
                   rows={2}
-                  placeholder="Tell the world about yourself..."
+                  placeholder={t('bioPlaceholder')}
                   className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50"
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
@@ -247,7 +272,7 @@ export default function Page() {
 
             {/* Social Links */}
             <div className="space-y-3">
-              <Label className="font-medium text-sm">Social links</Label>
+              <Label className="font-medium text-sm">{t('socialLinks')}</Label>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {SOCIALS.map((social) => (
                   <div
@@ -259,7 +284,7 @@ export default function Page() {
                       <AtSign className="h-3 w-3 text-muted-foreground" />
                       <input
                         className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-                        placeholder={social.placeholder}
+                        placeholder={tSocial(social.placeholder)}
                         value={socials[social.key] ?? ''}
                         onChange={(e) =>
                           handleSocialChange(social.key, e.target.value)
@@ -277,7 +302,7 @@ export default function Page() {
                 href="/claim-link"
                 className="text-muted-foreground text-sm hover:text-foreground"
               >
-                ← Back
+                {t('back')}
               </Link>
               <GradientButton
                 onClick={() => {
@@ -288,10 +313,10 @@ export default function Page() {
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating...
+                    {t('creating')}
                   </>
                 ) : (
-                  'Create page'
+                  t('createPage')
                 )}
               </GradientButton>
             </div>
@@ -301,7 +326,7 @@ export default function Page() {
           <div className="hidden border-border/50 border-l bg-muted/20 lg:block">
             <div className="sticky top-0 p-5">
               <p className="mb-3 font-medium text-[10px] text-muted-foreground uppercase tracking-widest">
-                Live Preview
+                {t('livePreview')}
               </p>
 
               {/* Scaled-down profile preview */}
@@ -315,7 +340,7 @@ export default function Page() {
                       </AvatarFallback>
                     </Avatar>
                     <h3 className="mt-2.5 font-cal text-base">
-                      {name || 'Your Name'}
+                      {name || t('yourName')}
                     </h3>
                     <p className="text-[10px] text-muted-foreground">
                       @{link || 'username'}
@@ -356,7 +381,7 @@ export default function Page() {
                           className="flex h-20 items-center justify-center rounded-xl border border-border/40 border-dashed bg-muted/30"
                         >
                           <span className="text-[9px] text-muted-foreground/30">
-                            Card
+                            {t('card')}
                           </span>
                         </div>
                       ))}

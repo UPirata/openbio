@@ -19,6 +19,7 @@ import { toSafeUrl } from '@/lib/url';
 import { cn } from '@/lib/utils';
 import type { AssetBentoSchema } from '@/types';
 import { ImagePlus, Pencil } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import type { ChangeEvent, RefObject } from 'react';
 import { useCallback, useRef, useState } from 'react';
@@ -31,12 +32,12 @@ export const IMAGE_CARD_SIZES = ['2x2', '4x1', '4x2', '2x4', '4x4'] as const;
 
 function getUploadButtonLabel(uploading: boolean, hasImage: boolean) {
   if (uploading) {
-    return 'Uploading...';
+    return 'uploading';
   }
   if (hasImage) {
-    return 'Replace Image';
+    return 'replaceImage';
   }
-  return 'Upload Image';
+  return 'uploadImage';
 }
 
 function ImageEditModal({
@@ -66,11 +67,14 @@ function ImageEditModal({
   fileInputRef: RefObject<HTMLInputElement | null>;
   onFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }) {
+  const t = useTranslations('cards');
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-cal text-xl">Edit Image</DialogTitle>
+          <DialogTitle className="font-cal text-xl">
+            {t('editImage')}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -78,7 +82,7 @@ function ImageEditModal({
             <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-border">
               <Image
                 src={modalImgUrl}
-                alt="Preview"
+                alt={t('preview')}
                 fill
                 sizes="(max-width: 640px) 100vw, 512px"
                 className="object-cover"
@@ -104,12 +108,12 @@ function ImageEditModal({
             disabled={uploading}
             onClick={onUploadClick}
           >
-            {getUploadButtonLabel(uploading, !!modalImgUrl)}
+            {t(getUploadButtonLabel(uploading, !!modalImgUrl))}
           </Button>
 
           <div className="space-y-2">
             <Label htmlFor="caption" className="font-medium text-sm">
-              Caption
+              {t('caption')}
             </Label>
             <Input
               id="caption"
@@ -122,7 +126,7 @@ function ImageEditModal({
 
           <div className="space-y-2">
             <Label htmlFor="image-href" className="font-medium text-sm">
-              Link URL
+              {t('linkUrl')}
             </Label>
             <Input
               id="image-href"
@@ -138,7 +142,7 @@ function ImageEditModal({
             onClick={onSave}
             disabled={uploading}
           >
-            Save
+            {t('save')}
           </Button>
         </div>
       </DialogContent>
@@ -153,6 +157,7 @@ export default function ImageCard({
   bento: BentoData;
   editable?: boolean;
 }) {
+  const t = useTranslations('cards');
   // Read straight from the card so undo/redo and refetches are reflected.
   const imgUrl = bento.url || '';
   const [uploading, setUploading] = useState(false);
@@ -172,7 +177,7 @@ export default function ImageCard({
       }
       if (file.size > MAX_UPLOAD_BYTES) {
         toast({
-          title: 'Image too large',
+          title: t('imageTooLarge'),
           description: `Choose an image of ${MAX_UPLOAD_LABEL} or less.`,
           variant: 'destructive',
         });
@@ -192,20 +197,20 @@ export default function ImageCard({
         });
         const data = (await res.json()) as { url?: string; error?: string };
         if (!res.ok || !data.url) {
-          throw new Error(data.error ?? 'Upload failed');
+          throw new Error(data.error ?? t('uploadFailed'));
         }
         setModalImgUrl(data.url);
       } catch (err) {
         toast({
-          title: 'Error',
-          description: err instanceof Error ? err.message : 'Upload failed',
+          title: t('error'),
+          description: err instanceof Error ? err.message : t('uploadFailed'),
         });
         setModalImgUrl(bento.url || '');
       } finally {
         setUploading(false);
       }
     },
-    [bento.url]
+    [bento.url, t]
   );
 
   const handleSave = async () => {
@@ -213,8 +218,8 @@ export default function ImageCard({
     const safeHref = trimmedHref ? toSafeUrl(trimmedHref) : undefined;
     if (safeHref === null) {
       toast({
-        title: 'Invalid link',
-        description: 'Enter a full link, like https://example.com.',
+        title: t('invalidLink'),
+        description: t('invalidLinkDesc'),
         variant: 'destructive',
       });
       return;
@@ -300,16 +305,17 @@ function EmptyEditableCard({
   uploading: boolean;
   onEdit: () => void;
 }) {
+  const t = useTranslations('cards');
   return (
     <div className="group relative z-0 flex h-full w-full select-none flex-col items-center justify-center gap-y-2 rounded-2xl border border-border border-dashed bg-card/50 shadow-sm transition-transform duration-200 ease-in-out md:cursor-move">
       <CardOverlay bento={bento} allowedSizes={IMAGE_CARD_SIZES} />
       <ImagePlus className="h-6 w-6 text-muted-foreground" />
       <p className="text-muted-foreground text-xs">
-        {uploading ? 'Uploading...' : 'No image'}
+        {uploading ? t('uploading') : t('noImage')}
       </p>
       <button
         type="button"
-        aria-label="Edit card"
+        aria-label={t('editCard')}
         className="absolute right-3 bottom-3 z-50 cursor-pointer rounded-lg border border-border/50 bg-background/90 p-1.5 text-muted-foreground opacity-0 shadow-md backdrop-blur-sm transition-all hover:bg-accent hover:text-accent-foreground focus-visible:opacity-100 group-hover:opacity-100"
         onPointerDown={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
@@ -339,6 +345,7 @@ function ImageDisplay({
   isBanner: boolean;
   onEdit: () => void;
 }) {
+  const t = useTranslations('cards');
   const hasLink = !!bento.href && !editable;
 
   const content = (
@@ -357,7 +364,7 @@ function ImageDisplay({
       <div className="absolute inset-0 overflow-hidden rounded-2xl">
         <Image
           src={imgUrl}
-          alt={bento.caption ?? 'Image'}
+          alt={bento.caption ?? t('image')}
           fill
           sizes="(max-width: 768px) 50vw, 25vw"
           className="object-cover"
@@ -372,7 +379,7 @@ function ImageDisplay({
       {editable && (
         <button
           type="button"
-          aria-label="Edit card"
+          aria-label={t('editCard')}
           className="absolute right-3 bottom-3 z-50 cursor-pointer rounded-lg border border-border/50 bg-background/90 p-1.5 text-muted-foreground opacity-0 shadow-md backdrop-blur-sm transition-all hover:bg-accent hover:text-accent-foreground focus-visible:opacity-100 group-hover:opacity-100"
           onPointerDown={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}

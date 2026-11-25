@@ -5,6 +5,7 @@ import { GradientButton } from '@/components/ui/gradient-button';
 import { useDebounce } from '@/hooks/use-debounce';
 import { api } from '@/trpc/react';
 import { Check, Loader2, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 function StatusIcon({
@@ -25,6 +26,7 @@ function StatusIcon({
 
 export default function ClaimLinkForm() {
   const [link, setLink] = useState('');
+  const t = useTranslations('claim');
   const debouncedLink = useDebounce(link, 500);
   const { data: available, isFetching } =
     api.profileLink.linkAvailable.useQuery(
@@ -46,11 +48,11 @@ export default function ClaimLinkForm() {
         <input
           className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           autoFocus
-          aria-label="Your page name"
+          aria-label={t('pageNameLabel')}
           autoCapitalize="none"
           autoCorrect="off"
           spellCheck={false}
-          placeholder="yourname"
+          placeholder={t('placeholder')}
           value={link}
           onChange={(e) => setLink(e.target.value)}
         />
@@ -61,13 +63,11 @@ export default function ClaimLinkForm() {
         )}
       </div>
       {debouncedLink && !isFetching && !available && (
-        <p className="text-center text-red-500 text-sm">
-          This username is taken
-        </p>
+        <p className="text-center text-red-500 text-sm">{t('taken')}</p>
       )}
       {debouncedLink && !isFetching && available && (
         <GradientButton type="submit" className="w-full">
-          Claim my page
+          {t('claimMine')}
         </GradientButton>
       )}
       <p className="text-center">
@@ -75,7 +75,7 @@ export default function ClaimLinkForm() {
           href="/"
           className="text-muted-foreground text-xs transition-colors hover:text-foreground"
         >
-          ← Back to home
+          {t('backHome')}
         </a>
       </p>
     </form>

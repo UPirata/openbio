@@ -3,49 +3,50 @@
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
+type TourKey = `${'profile' | 'preview' | 'device' | 'cards' | 'theme'}${
+  | 'Title'
+  | 'Desc'}`;
+
 type TourStep = {
   target: string;
-  title: string;
-  description: string;
+  title: TourKey;
+  description: TourKey;
   placement?: 'top' | 'bottom' | 'left' | 'right';
 };
 
 const TOUR_STEPS: TourStep[] = [
   {
     target: '[data-tour="profile-header"]',
-    title: 'Your profile',
-    description:
-      'Click on your name or bio to edit them directly. Tap your avatar to change it.',
+    title: 'profileTitle',
+    description: 'profileDesc',
     placement: 'bottom',
   },
   {
     target: '[data-tour="preview-toggle"]',
-    title: 'Preview mode',
-    description:
-      'See how visitors see your page. Toggle back to edit mode to make changes.',
+    title: 'previewTitle',
+    description: 'previewDesc',
     placement: 'bottom',
   },
   {
     target: '[data-tour="viewport-switcher"]',
-    title: 'Device preview',
-    description: 'Preview your profile on desktop or in a phone frame.',
+    title: 'deviceTitle',
+    description: 'deviceDesc',
     placement: 'bottom',
   },
   {
     target: '[data-tour="add-card"]',
-    title: 'Add cards',
-    description:
-      'Build your page with links, images, maps, GitHub stats, countdowns, weather, email collection, and more.',
+    title: 'cardsTitle',
+    description: 'cardsDesc',
     placement: 'top',
   },
   {
     target: '[data-tour="theme-settings"]',
-    title: 'Make it yours',
-    description:
-      'Pick a theme, toggle dark mode, set accent colors, and customize your footer text.',
+    title: 'themeTitle',
+    description: 'themeDesc',
     placement: 'top',
   },
 ];
@@ -107,6 +108,7 @@ function Tooltip({
   onNext: () => void;
   onSkip: () => void;
 }) {
+  const t = useTranslations('tour');
   const placement = step.placement ?? 'bottom';
   const tooltipWidth = 280;
 
@@ -136,15 +138,15 @@ function Tooltip({
         type="button"
         onClick={onSkip}
         className="absolute top-3 right-3 text-muted-foreground transition-colors hover:text-foreground"
-        aria-label="Close tour"
+        aria-label={t('closeTour')}
       >
         <X className="h-3.5 w-3.5" />
       </button>
 
       <div className="space-y-2">
-        <p className="font-cal text-sm">{step.title}</p>
+        <p className="font-cal text-sm">{t(step.title)}</p>
         <p className="text-muted-foreground text-xs leading-relaxed">
-          {step.description}
+          {t(step.description)}
         </p>
       </div>
 
@@ -167,7 +169,7 @@ function Tooltip({
           className="h-7 rounded-lg px-3 text-xs"
           onClick={onNext}
         >
-          {isLast ? 'Done' : 'Next'}
+          {isLast ? t('done') : t('next')}
         </Button>
       </div>
     </div>

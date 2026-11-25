@@ -6,6 +6,7 @@ import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL } from '@/lib/upload-limits';
 import { cn } from '@/lib/utils';
 import type { RouterOutputs } from '@/trpc/react';
 import { UploadCloud } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useCallback, useState } from 'react';
 import { type FileWithPath, useDropzone } from 'react-dropzone';
 
@@ -15,6 +16,8 @@ type Props = {
 
 export default function ProfileLinkAvatar({ profileLink }: Props) {
   const [img, setImg] = useState(profileLink.image);
+  const t = useTranslations('editor');
+  const tc = useTranslations('common');
 
   const onDrop = useCallback(
     async (acceptedFiles: FileWithPath[]) => {
@@ -24,8 +27,8 @@ export default function ProfileLinkAvatar({ profileLink }: Props) {
       }
       if (file.size > MAX_UPLOAD_BYTES) {
         toast({
-          title: 'Image too large',
-          description: `Choose an image of ${MAX_UPLOAD_LABEL} or less.`,
+          title: t('imageTooLarge'),
+          description: t('imageTooLargeDesc', { size: MAX_UPLOAD_LABEL }),
           variant: 'destructive',
         });
         return;
@@ -44,18 +47,18 @@ export default function ProfileLinkAvatar({ profileLink }: Props) {
         });
         const data = (await res.json()) as { url?: string; error?: string };
         if (!res.ok || !data.url) {
-          throw new Error(data.error ?? 'Upload failed');
+          throw new Error(data.error ?? t('uploadFailed'));
         }
         setImg(data.url);
       } catch (err) {
         toast({
-          title: 'Error',
-          description: err instanceof Error ? err.message : 'Upload failed',
+          title: tc('error'),
+          description: err instanceof Error ? err.message : t('uploadFailed'),
         });
         setImg(profileLink.image ?? '/openbio.png');
       }
     },
-    [profileLink.id, profileLink.image]
+    [profileLink.id, profileLink.image, t, tc]
   );
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -82,7 +85,7 @@ export default function ProfileLinkAvatar({ profileLink }: Props) {
         <Image
           key={img}
           src={img}
-          alt={`${profileLink.name}'s profile picture`}
+          alt={t('profilePicture', { name: profileLink.name ?? '' })}
           width={150}
           height={150}
           priority
@@ -93,7 +96,9 @@ export default function ProfileLinkAvatar({ profileLink }: Props) {
       {profileLink.isOwner && !img && (
         <>
           <UploadCloud className="h-8 w-8 text-muted-foreground" />
-          <p className="font-semibold text-muted-foreground text-sm">Upload</p>
+          <p className="font-semibold text-muted-foreground text-sm">
+            {t('upload')}
+          </p>
         </>
       )}
 

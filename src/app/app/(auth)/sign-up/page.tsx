@@ -8,6 +8,7 @@ import { authClient, signIn, signUp } from '@/lib/auth-client';
 import { getSafeRedirect, withRedirect } from '@/lib/redirect';
 import OpenBioLogo from '@/public/openbio.png';
 import { Loader2, MailCheck } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -18,6 +19,8 @@ export default function SignUpPage() {
   const searchParams = useSearchParams();
   // Where to land once signed in, e.g. the profile name claimed on the homepage.
   const redirectTo = getSafeRedirect(searchParams.get('redirectUrl'));
+  const t = useTranslations('auth');
+  const tc = useTranslations('common');
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -40,7 +43,7 @@ export default function SignUpPage() {
       callbackURL: redirectTo,
     });
     if (result.error) {
-      setError(result.error.message ?? 'Something went wrong');
+      setError(result.error.message ?? tc('somethingWentWrong'));
       setLoading(false);
       return;
     }
@@ -64,7 +67,7 @@ export default function SignUpPage() {
       callbackURL: redirectTo,
     });
     if (result.error) {
-      setError(result.error.message ?? 'Something went wrong');
+      setError(result.error.message ?? tc('somethingWentWrong'));
       setResendState('idle');
       return;
     }
@@ -78,11 +81,14 @@ export default function SignUpPage() {
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-violet-500/10">
           <MailCheck className="h-6 w-6 text-violet-600" />
         </div>
-        <h1 className="mt-4 font-cal text-2xl">Check your inbox</h1>
+        <h1 className="mt-4 font-cal text-2xl">{t('checkInbox')}</h1>
         <p className="mt-2 text-muted-foreground text-sm">
-          We sent a verification link to{' '}
-          <span className="font-medium text-foreground">{sentTo}</span>. Open it
-          to finish creating your account.
+          {t.rich('sentVerification', {
+            email: sentTo,
+            b: (chunks) => (
+              <span className="font-medium text-foreground">{chunks}</span>
+            ),
+          })}
         </p>
         {error && (
           <p className="mt-4 rounded-xl bg-destructive/10 px-3 py-2 text-destructive text-sm">
@@ -99,11 +105,11 @@ export default function SignUpPage() {
           {resendState === 'sending' && (
             <Loader2 className="h-4 w-4 animate-spin" />
           )}
-          {resendState === 'sent' && 'Email sent again'}
-          {resendState === 'idle' && 'Resend email'}
+          {resendState === 'sent' && t('emailSentAgain')}
+          {resendState === 'idle' && t('resendEmail')}
         </Button>
         <p className="mt-6 text-muted-foreground text-sm">
-          Wrong address?{' '}
+          {t('wrongAddress')}{' '}
           <button
             type="button"
             className="font-medium text-foreground underline underline-offset-4 hover:text-violet-600"
@@ -113,7 +119,7 @@ export default function SignUpPage() {
               setError('');
             }}
           >
-            Go back
+            {t('goBack')}
           </button>
         </p>
       </div>
@@ -126,18 +132,18 @@ export default function SignUpPage() {
         <Link href="/">
           <Image src={OpenBioLogo} alt="OpenBio" width={48} height={48} />
         </Link>
-        <h1 className="mt-4 font-cal text-2xl">Create your account</h1>
+        <h1 className="mt-4 font-cal text-2xl">{t('createYourAccount')}</h1>
         <p className="mt-1 text-muted-foreground text-sm">
-          Get started with OpenBio
+          {t('getStartedWith')}
         </p>
       </div>
       <form onSubmit={handleSubmit} className="flex flex-col gap-y-5">
         <div className="space-y-2">
-          <Label htmlFor="name">Display name</Label>
+          <Label htmlFor="name">{t('displayName')}</Label>
           <Input
             id="name"
             type="text"
-            placeholder="John Doe"
+            placeholder={t('namePlaceholder')}
             className="h-11 rounded-xl"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -145,7 +151,7 @@ export default function SignUpPage() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{tc('email')}</Label>
           <Input
             id="email"
             type="email"
@@ -157,7 +163,7 @@ export default function SignUpPage() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">{tc('password')}</Label>
           <Input
             id="password"
             type="password"
@@ -182,7 +188,7 @@ export default function SignUpPage() {
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            'Create account'
+            t('createAccount')
           )}
         </GradientButton>
       </form>
@@ -192,7 +198,7 @@ export default function SignUpPage() {
         </div>
         <div className="relative flex justify-center text-xs uppercase">
           <span className="bg-card px-2 text-muted-foreground">
-            or continue with
+            {t('orContinueWith')}
           </span>
         </div>
       </div>
@@ -251,12 +257,12 @@ export default function SignUpPage() {
         </Button>
       </div>
       <p className="mt-6 text-center text-muted-foreground text-sm">
-        Already have an account?{' '}
+        {t('haveAccount')}{' '}
         <Link
           href={withRedirect('/app/sign-in', redirectTo)}
           className="font-medium text-foreground underline underline-offset-4 hover:text-violet-600"
         >
-          Sign in
+          {t('signIn')}
         </Link>
       </p>
     </div>

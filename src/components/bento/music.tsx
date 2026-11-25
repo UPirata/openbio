@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils';
 import { api } from '@/trpc/react';
 import type { MusicBentoSchema } from '@/types';
 import { ExternalLink, Music, Pencil } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import type * as z from 'zod';
 
@@ -41,6 +42,7 @@ function MusicDisplay({
   url: string;
   compact?: boolean;
 }) {
+  const t = useTranslations('cards');
   const { data: metadata, isLoading } =
     api.profileLink.getMusicMetadata.useQuery(
       { url },
@@ -57,7 +59,7 @@ function MusicDisplay({
           )}
         />
         <p className="text-muted-foreground text-xs">
-          {compact ? 'Add a song' : 'Paste a Spotify or Apple Music link'}
+          {compact ? t('addSong') : t('pasteMusic')}
         </p>
       </div>
     );
@@ -87,9 +89,9 @@ function MusicDisplay({
           <Music className="h-5 w-5 text-foreground" />
         </div>
         <div className="mt-auto">
-          <p className="font-cal text-sm leading-tight">Listen</p>
+          <p className="font-cal text-sm leading-tight">{t('listen')}</p>
           <p className="mt-1 flex items-center gap-1 text-muted-foreground text-xs">
-            Open <ExternalLink className="h-3 w-3" />
+            {t('open')} <ExternalLink className="h-3 w-3" />
           </p>
         </div>
       </a>
@@ -185,7 +187,7 @@ function MusicDisplay({
           <div className="mt-3 flex items-center gap-2">
             <ProviderIcon provider={metadata.provider} />
             <span className="text-white/50 text-xs">
-              Listen on{' '}
+              {t('listenOn')}{' '}
               {metadata.provider === 'spotify' ? 'Spotify' : 'Apple Music'}
             </span>
           </div>
@@ -202,6 +204,7 @@ export default function MusicCard({
   bento: BentoData;
   editable?: boolean;
 }) {
+  const t = useTranslations('cards');
   const [editOpen, setEditOpen] = useState(false);
   const [url, setUrl] = useState(bento.url ?? '');
 
@@ -244,7 +247,7 @@ export default function MusicCard({
         {editable && (
           <button
             type="button"
-            aria-label="Edit card"
+            aria-label={t('editCard')}
             className="absolute top-3 right-3 z-50 cursor-pointer rounded-lg border border-border/50 bg-background/90 p-1.5 text-muted-foreground opacity-0 shadow-md backdrop-blur-sm transition-all hover:bg-accent hover:text-accent-foreground focus-visible:opacity-100 group-hover:opacity-100"
             onPointerDown={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
@@ -262,13 +265,13 @@ export default function MusicCard({
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-cal text-xl">
-              Edit Music Card
+              {t('editMusic')}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="music-url" className="font-medium text-sm">
-                Song or Playlist URL
+                {t('songUrl')}
               </Label>
               <Input
                 id="music-url"
@@ -277,9 +280,7 @@ export default function MusicCard({
                 onChange={(e) => setUrl(e.target.value)}
                 className="rounded-xl"
               />
-              <p className="text-muted-foreground text-xs">
-                Paste a Spotify or Apple Music link
-              </p>
+              <p className="text-muted-foreground text-xs">{t('pasteMusic')}</p>
             </div>
 
             {previewMetadata && (
@@ -310,7 +311,7 @@ export default function MusicCard({
               disabled={isPending}
               className="w-full rounded-xl"
             >
-              {isPending ? 'Saving...' : 'Save'}
+              {isPending ? t('saving') : t('save')}
             </Button>
           </div>
         </DialogContent>

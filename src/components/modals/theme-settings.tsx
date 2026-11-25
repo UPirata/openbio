@@ -15,15 +15,9 @@ import { THEME_PRESETS } from '@/lib/themes';
 import { cn } from '@/lib/utils';
 import { api } from '@/trpc/react';
 import { Check, Lock, Moon, Paintbrush, Palette, Type } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { type ReactNode, useState } from 'react';
-
-function showProUpsell() {
-  toast({
-    title: 'Pro feature',
-    description: 'Upgrade to Pro to unlock this feature.',
-  });
-}
 
 function SectionHeader({
   icon,
@@ -51,6 +45,11 @@ export default function ThemeSettingsModal({
   isPremium: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const t = useTranslations('theme');
+  const tm = useTranslations('modals');
+  const tc = useTranslations('common');
+  const showProUpsell = () =>
+    toast({ title: tm('proFeature'), description: tm('proGeneric') });
   const router = useRouter();
   const { link } = useParams<{ link: string }>();
   const queryClient = api.useContext();
@@ -74,7 +73,7 @@ export default function ThemeSettingsModal({
     },
     onError: (err) => {
       toast({
-        title: "Couldn't save your theme",
+        title: tm('saveThemeError'),
         description: getErrorMessage(err),
         variant: 'destructive',
       });
@@ -102,7 +101,9 @@ export default function ThemeSettingsModal({
         showClose
       >
         <DialogHeader>
-          <DialogTitle className="font-cal text-xl">Customize</DialogTitle>
+          <DialogTitle className="font-cal text-xl">
+            {t('customize')}
+          </DialogTitle>
         </DialogHeader>
 
         <div
@@ -114,7 +115,7 @@ export default function ThemeSettingsModal({
             <div className="space-y-3">
               <SectionHeader
                 icon={<Palette className="h-4 w-4" />}
-                title="Theme"
+                title={t('theme')}
               />
               <div className="grid grid-cols-2 gap-2">
                 {THEME_PRESETS.map((preset) => {
@@ -176,7 +177,7 @@ export default function ThemeSettingsModal({
               <div className="flex items-center justify-between">
                 <SectionHeader
                   icon={<Moon className="h-4 w-4" />}
-                  title="Dark Mode"
+                  title={t('darkMode')}
                   locked={!isPremium}
                 />
                 <Switch
@@ -197,7 +198,7 @@ export default function ThemeSettingsModal({
             <div className="space-y-3">
               <SectionHeader
                 icon={<Paintbrush className="h-4 w-4" />}
-                title="Accent Color"
+                title={t('accentColor')}
                 locked={!isPremium}
               />
               <div className="flex items-center gap-2">
@@ -238,7 +239,7 @@ export default function ThemeSettingsModal({
                     className="shrink-0 rounded-xl text-xs"
                     onClick={() => setAccentColor('')}
                   >
-                    Reset
+                    {t('reset')}
                   </Button>
                 )}
               </div>
@@ -248,13 +249,13 @@ export default function ThemeSettingsModal({
             <div className="space-y-3">
               <SectionHeader
                 icon={<Type className="h-4 w-4" />}
-                title="Footer Text"
+                title={t('footerText')}
                 locked={!isPremium}
               />
               <input
                 type="text"
                 className="h-9 w-full rounded-xl border border-border bg-card px-3 text-sm disabled:cursor-not-allowed disabled:opacity-50"
-                placeholder="Made with OpenBio"
+                placeholder={t('footerPlaceholder')}
                 value={customFooter}
                 disabled={!isPremium}
                 maxLength={100}
@@ -266,9 +267,7 @@ export default function ThemeSettingsModal({
                   setCustomFooter(e.target.value);
                 }}
               />
-              <p className="text-muted-foreground text-xs">
-                Shown at the bottom of your profile page.
-              </p>
+              <p className="text-muted-foreground text-xs">{t('footerHelp')}</p>
             </div>
           </div>
         </div>
@@ -280,14 +279,14 @@ export default function ThemeSettingsModal({
             className="rounded-xl px-6"
             onClick={() => setOpen(false)}
           >
-            Cancel
+            {tc('cancel')}
           </Button>
           <Button
             onClick={save}
             disabled={isPending}
             className="rounded-xl px-6"
           >
-            {isPending ? 'Saving...' : 'Save changes'}
+            {isPending ? tm('saving') : tm('saveChanges')}
           </Button>
         </div>
       </DialogContent>

@@ -21,34 +21,39 @@ import {
   Share2,
   Smartphone,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
-import { useEffect, useRef, useState, useTransition } from 'react';
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import ProfileLinkAvatar from './avatar';
 import BioToolbar from './bio-toolbar';
 import { usePreview } from './preview-context';
 
-const extensions = [
-  StarterKit.configure({
-    link: false,
-    underline: false,
-  }),
-  Placeholder.configure({
-    placeholder: 'Tell us about yourself!',
-    showOnlyWhenEditable: true,
-  }),
-  TiptapLink.configure({ openOnClick: false }),
-  TiptapUnderline,
-  TextStyle,
-  Color,
-  Highlight.configure({ multicolor: true }),
-] as Extension[];
+const buildExtensions = (placeholder: string) =>
+  [
+    StarterKit.configure({
+      link: false,
+      underline: false,
+    }),
+    Placeholder.configure({
+      placeholder,
+      showOnlyWhenEditable: true,
+    }),
+    TiptapLink.configure({ openOnClick: false }),
+    TiptapUnderline,
+    TextStyle,
+    Color,
+    Highlight.configure({ multicolor: true }),
+  ] as Extension[];
+
+const PREVIEW_TOGGLE_KEY: Record<
+  'true' | 'false',
+  'backToEditing' | 'previewAsVisitor'
+> = {
+  true: 'backToEditing',
+  false: 'previewAsVisitor',
+};
 
 type ProfileLinkData = NonNullable<RouterOutputs['profileLink']['getByLink']>;
-
-const PREVIEW_TOGGLE_LABEL: Record<string, string> = {
-  true: 'Back to editing',
-  false: 'Preview as a visitor',
-};
 
 type HeaderFields = { name?: string | null; bio?: string | null };
 
@@ -83,6 +88,8 @@ export default function ProfileLinkHeader({
     { initialData, staleTime: 60_000 }
   );
 
+  const t = useTranslations('editor');
+  const extensions = useMemo(() => buildExtensions(t('bioPlaceholder')), [t]);
   const [name, setName] = useState(profileLink?.name);
   const [bio, setBio] = useState(profileLink?.bio);
   const [saving, startSaving] = useTransition();
@@ -120,7 +127,7 @@ export default function ProfileLinkHeader({
           );
         } catch (err) {
           toast({
-            title: "Couldn't save your profile",
+            title: t('saveProfileError'),
             description: getErrorMessage(err),
             variant: 'destructive',
           });
@@ -129,7 +136,7 @@ export default function ProfileLinkHeader({
     }, 800);
 
     return () => clearTimeout(timer);
-  }, [name, bio, updateProfileLink, profileLinkId, isOwner, link, utils]);
+  }, [name, bio, updateProfileLink, profileLinkId, isOwner, link, utils, t]);
 
   const { preview, setPreview, viewport, setViewport } = usePreview();
 
@@ -179,8 +186,8 @@ export default function ProfileLinkHeader({
             <Button
               size="icon"
               variant={preview ? 'default' : 'outline'}
-              aria-label={PREVIEW_TOGGLE_LABEL[String(preview)]}
-              title={PREVIEW_TOGGLE_LABEL[String(preview)]}
+              aria-label={t(PREVIEW_TOGGLE_KEY[preview ? 'true' : 'false'])}
+              title={t(PREVIEW_TOGGLE_KEY[preview ? 'true' : 'false'])}
               onClick={() => setPreview(!preview)}
               data-tour="preview-toggle"
             >
@@ -202,7 +209,7 @@ export default function ProfileLinkHeader({
                     variant={viewport === 'desktop' ? 'default' : 'ghost'}
                     className="rounded-r-none"
                     onClick={() => setViewport('desktop')}
-                    aria-label="Desktop view"
+                    aria-label={t('desktopView')}
                   >
                     <Monitor className="h-[1.2rem] w-[1.2rem]" />
                   </Button>
@@ -211,7 +218,7 @@ export default function ProfileLinkHeader({
                     variant={viewport === 'mobile' ? 'default' : 'ghost'}
                     className="rounded-l-none"
                     onClick={() => setViewport('mobile')}
-                    aria-label="Mobile view"
+                    aria-label={t('mobileView')}
                   >
                     <Smartphone className="h-[1.2rem] w-[1.2rem]" />
                   </Button>
@@ -224,14 +231,14 @@ export default function ProfileLinkHeader({
                       .writeText(`https://openbio.app/${profileLink.link}`)
                       .then(() => {
                         toast({
-                          title: 'Copied to clipboard!',
-                          description: 'Copied profile link to clipboard!',
+                          title: t('copiedClipboard'),
+                          description: t('profileLinkCopied'),
                         });
                       })
                       .catch(() => undefined);
                   }}
                 >
-                  {saving ? 'Saving...' : 'Share'}
+                  {saving ? t('saving') : t('share')}
                 </Button>
 
                 <LinkQRModal profileLink={profileLink}>
@@ -239,8 +246,8 @@ export default function ProfileLinkHeader({
                     size="icon"
                     variant="outline"
                     disabled={saving}
-                    aria-label="QR code"
-                    title="QR code"
+                    aria-label={t('qrCode')}
+                    title={t('qrCode')}
                   >
                     <QrCode className="h-[1.2rem] w-[1.2rem]" />
                   </Button>
@@ -260,7 +267,7 @@ export default function ProfileLinkHeader({
                 if (navigator.share) {
                   navigator
                     .share({
-                      title: profileLink.name ?? 'OpenBio Profile',
+                      title: profileLink.name ?? t('openBioProfile'),
                       url,
                     })
                     .catch(() => undefined);
@@ -269,8 +276,8 @@ export default function ProfileLinkHeader({
                     .writeText(url)
                     .then(() => {
                       toast({
-                        title: 'Copied to clipboard!',
-                        description: 'Profile link copied!',
+                        title: t('copiedClipboard'),
+                        description: t('profileLinkCopied'),
                       });
                     })
                     .catch(() => undefined);
@@ -278,15 +285,15 @@ export default function ProfileLinkHeader({
               }}
             >
               <Share2 className="mr-1.5 h-4 w-4" />
-              Share
+              {t('share')}
             </Button>
             <LinkQRModal profileLink={profileLink}>
               <Button
                 size="icon"
                 variant="outline"
                 className="h-9 w-9"
-                aria-label="QR code"
-                title="QR code"
+                aria-label={t('qrCode')}
+                title={t('qrCode')}
               >
                 <QrCode className="h-4 w-4" />
               </Button>
@@ -300,7 +307,7 @@ export default function ProfileLinkHeader({
           className="min-w-0 shrink bg-transparent font-cal text-3xl text-foreground outline-none focus:outline-none md:text-4xl lg:text-6xl"
           defaultValue={profileLink.name}
           maxLength={100}
-          aria-label="Display name"
+          aria-label={t('displayName')}
           onChange={(e) => setName(e.target.value)}
           readOnly={!isEditable}
           size={Math.max((name ?? profileLink.name ?? '').length, 1)}

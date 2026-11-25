@@ -2,6 +2,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LayoutGrid, Settings } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type React from 'react';
 
@@ -18,6 +19,7 @@ export function DashboardTabs({
   // The open tab lives in the URL (`/app?tab=settings`), so links elsewhere in
   // the app can open Settings directly and a reload stays where you were.
   const router = useRouter();
+  const t = useTranslations('dashboard');
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const requested = searchParams.get('tab');
@@ -43,11 +45,11 @@ export function DashboardTabs({
       <TabsList>
         <TabsTrigger value="pages" className="gap-x-1.5">
           <LayoutGrid className="h-3.5 w-3.5" />
-          Pages
+          {t('pages')}
         </TabsTrigger>
         <TabsTrigger value="settings" className="gap-x-1.5">
           <Settings className="h-3.5 w-3.5" />
-          Settings
+          {t('settings')}
         </TabsTrigger>
       </TabsList>
 

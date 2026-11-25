@@ -9,6 +9,7 @@ import { htmlToText, serializeJsonLd } from '@/lib/html';
 import { api } from '@/trpc/server';
 import { ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense, cache } from 'react';
@@ -37,14 +38,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const profileLink = await getProfileLink(link);
 
+  const t = await getTranslations('profile');
+
   if (!profileLink) {
-    return { ...defaultMetadata, title: 'Profile not found' };
+    return { ...defaultMetadata, title: t('notFound') };
   }
 
   const title = profileLink.name ?? defaultMetadata.title;
   const description =
     htmlToText(profileLink.bio ?? '').slice(0, 300) ||
-    `This is ${profileLink.name ?? profileLink.link}'s profile.`;
+    t('defaultDescription', { name: profileLink.name ?? profileLink.link });
 
   // Names and bios are free text: unencoded, a `&` or `#` would cut the
   // image URL short and drop the rest of the title.
@@ -75,6 +78,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function Page({ params }: Props) {
   const { link } = await params;
   const profileLink = await getProfileLink(link);
+  const t = await getTranslations('profile');
 
   if (!profileLink) {
     notFound();
@@ -153,10 +157,13 @@ export default async function Page({ params }: Props) {
                         href={`${APP_URL}/claim-link`}
                         className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-background/80 px-4 py-2 text-muted-foreground text-sm backdrop-blur-sm transition-all hover:border-primary hover:text-foreground"
                       >
-                        Create your own free page on
-                        <span className="font-semibold text-foreground">
-                          OpenBio
-                        </span>
+                        {t.rich('createYourOwn', {
+                          b: (chunks) => (
+                            <span className="font-semibold text-foreground">
+                              {chunks}
+                            </span>
+                          ),
+                        })}
                         <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                       </Link>
                     )}

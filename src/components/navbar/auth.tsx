@@ -1,3 +1,4 @@
+import { LanguageSwitcher } from '@/components/language-switcher';
 import OpenBio from '@/public/openbio.png';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -14,6 +15,7 @@ export default function AuthNavbar() {
           loading="eager"
         />
       </Link>
+      <LanguageSwitcher />
     </div>
   );
 }

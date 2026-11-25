@@ -29,6 +29,7 @@ import {
   MousePointerClick,
   Users,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
@@ -38,14 +39,14 @@ const DAYS = 30;
 
 const viewsConfig = {
   views: {
-    label: 'Views',
+    label: 'views',
     color: 'var(--chart-1)',
   },
 } satisfies ChartConfig;
 
 const clicksConfig = {
   clicks: {
-    label: 'Clicks',
+    label: 'clicks',
     color: 'var(--chart-2)',
   },
 } satisfies ChartConfig;
@@ -64,6 +65,7 @@ function formatDate(dateStr: string) {
 
 /** Downloads daily views and clicks as a CSV. A Business plan feature. */
 function ExportAnalyticsButton({ linkId }: { linkId: string }) {
+  const t = useTranslations('analytics');
   const utils = api.useUtils();
   const [exporting, setExporting] = useState(false);
 
@@ -75,13 +77,13 @@ function ExportAnalyticsButton({ linkId }: { linkId: string }) {
         days: DAYS,
       });
       downloadCsv(`openbio-analytics-${DAYS}-days.csv`, [
-        ['Date', 'Views', 'Clicks'],
+        [t('date'), t('views'), t('clicks')],
         ...rows.map((r) => [r.date, r.views, r.clicks]),
       ]);
     } catch (err) {
       // Free and Pro accounts land here: export is a Business feature.
       toast({
-        title: "Couldn't export analytics",
+        title: t('exportError'),
         description: getErrorMessage(err),
       });
     } finally {
@@ -95,15 +97,16 @@ function ExportAnalyticsButton({ linkId }: { linkId: string }) {
       size="sm"
       onClick={exportAnalytics}
       disabled={exporting}
-      title="Download daily views and clicks as a spreadsheet (Business plan)"
+      title={t('exportHint')}
     >
       <Download className="mr-1.5 h-3.5 w-3.5" />
-      {exporting ? 'Exporting…' : 'Export analytics'}
+      {exporting ? 'Exporting…' : t('export')}
     </Button>
   );
 }
 
 export default function Analytics({ linkId }: { linkId: string }) {
+  const t = useTranslations('analytics');
   const { data, isLoading, isError, error, refetch, isFetching } =
     api.profileLink.analytics.useQuery(
       { linkId, days: DAYS },
@@ -144,12 +147,9 @@ export default function Analytics({ linkId }: { linkId: string }) {
     return (
       <Card>
         <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-          <p className="font-cal text-lg">Analytics unavailable</p>
+          <p className="font-cal text-lg">{t('unavailable')}</p>
           <p className="max-w-sm text-muted-foreground text-sm">
-            {getErrorMessage(
-              error,
-              "We couldn't load analytics for this page."
-            )}
+            {getErrorMessage(error, t('loadError'))}
           </p>
           <div className="flex items-center gap-3">
             <Button
@@ -158,10 +158,10 @@ export default function Analytics({ linkId }: { linkId: string }) {
               onClick={() => refetch()}
               disabled={isFetching}
             >
-              Try again
+              {t('tryAgain')}
             </Button>
             <Button asChild variant="ghost" className="rounded-xl">
-              <Link href="/app">Back to dashboard</Link>
+              <Link href="/app">{t('backToDashboard')}</Link>
             </Button>
           </div>
         </CardContent>
@@ -187,7 +187,9 @@ export default function Analytics({ linkId }: { linkId: string }) {
   return (
     <div className="grid gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-muted-foreground text-sm">Last {DAYS} days</p>
+        <p className="text-muted-foreground text-sm">
+          {t('lastDays', { days: DAYS })}
+        </p>
         <ExportAnalyticsButton linkId={linkId} />
       </div>
 
@@ -195,7 +197,9 @@ export default function Analytics({ linkId }: { linkId: string }) {
       <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="font-medium text-sm">Total Views</CardTitle>
+            <CardTitle className="font-medium text-sm">
+              {t('totalViews')}
+            </CardTitle>
             <Eye className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -204,7 +208,9 @@ export default function Analytics({ linkId }: { linkId: string }) {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="font-medium text-sm">Unique Views</CardTitle>
+            <CardTitle className="font-medium text-sm">
+              {t('uniqueViews')}
+            </CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -213,7 +219,9 @@ export default function Analytics({ linkId }: { linkId: string }) {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="font-medium text-sm">Total Clicks</CardTitle>
+            <CardTitle className="font-medium text-sm">
+              {t('totalClicks')}
+            </CardTitle>
             <MousePointerClick className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -222,7 +230,9 @@ export default function Analytics({ linkId }: { linkId: string }) {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="font-medium text-sm">Click Rate</CardTitle>
+            <CardTitle className="font-medium text-sm">
+              {t('clickRate')}
+            </CardTitle>
             <MousePointerClick className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -238,16 +248,21 @@ export default function Analytics({ linkId }: { linkId: string }) {
       {/* Views over time */}
       <Card>
         <CardHeader>
-          <CardTitle className="font-cal">Views</CardTitle>
-          <CardDescription>Profile views over the last 30 days</CardDescription>
+          <CardTitle className="font-cal">{t('views')}</CardTitle>
+          <CardDescription>{t('viewsOver30')}</CardDescription>
         </CardHeader>
         <CardContent>
           {viewsData.length === 0 ? (
             <p className="py-12 text-center text-muted-foreground text-sm">
-              No view data yet
+              {t('noViewData')}
             </p>
           ) : (
-            <ChartContainer config={viewsConfig} className="h-[250px] w-full">
+            <ChartContainer
+              config={{
+                views: { ...viewsConfig.views, label: t('views') },
+              }}
+              className="h-[250px] w-full"
+            >
               <AreaChart data={viewsData}>
                 <CartesianGrid vertical={false} />
                 <XAxis
@@ -274,16 +289,21 @@ export default function Analytics({ linkId }: { linkId: string }) {
       {/* Clicks over time */}
       <Card>
         <CardHeader>
-          <CardTitle className="font-cal">Clicks</CardTitle>
-          <CardDescription>Card clicks over the last 30 days</CardDescription>
+          <CardTitle className="font-cal">{t('clicks')}</CardTitle>
+          <CardDescription>{t('clicksOver30')}</CardDescription>
         </CardHeader>
         <CardContent>
           {clicksData.length === 0 ? (
             <p className="py-12 text-center text-muted-foreground text-sm">
-              No click data yet
+              {t('noClickData')}
             </p>
           ) : (
-            <ChartContainer config={clicksConfig} className="h-[250px] w-full">
+            <ChartContainer
+              config={{
+                clicks: { ...clicksConfig.clicks, label: t('clicks') },
+              }}
+              className="h-[250px] w-full"
+            >
               <AreaChart data={clicksData}>
                 <CartesianGrid vertical={false} />
                 <XAxis
@@ -312,13 +332,13 @@ export default function Analytics({ linkId }: { linkId: string }) {
         {/* Top clicked cards */}
         <Card>
           <CardHeader>
-            <CardTitle className="font-cal">Top Links</CardTitle>
-            <CardDescription>Most clicked cards</CardDescription>
+            <CardTitle className="font-cal">{t('topLinks')}</CardTitle>
+            <CardDescription>{t('mostClicked')}</CardDescription>
           </CardHeader>
           <CardContent>
             {data.topCards.length === 0 ? (
               <p className="py-6 text-center text-muted-foreground text-sm">
-                No click data yet
+                {t('noClickData')}
               </p>
             ) : (
               <div className="space-y-3">
@@ -357,13 +377,13 @@ export default function Analytics({ linkId }: { linkId: string }) {
         {/* Top referrers */}
         <Card>
           <CardHeader>
-            <CardTitle className="font-cal">Top Referrers</CardTitle>
-            <CardDescription>Where your visitors come from</CardDescription>
+            <CardTitle className="font-cal">{t('topReferrers')}</CardTitle>
+            <CardDescription>{t('referrersDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             {data.topReferrers.length === 0 ? (
               <p className="py-6 text-center text-muted-foreground text-sm">
-                No referrer data yet
+                {t('noReferrerData')}
               </p>
             ) : (
               <div className="space-y-3">
@@ -372,7 +392,7 @@ export default function Analytics({ linkId }: { linkId: string }) {
                   const pct = Math.round((r.count / maxCount) * 100);
                   let label = r.referrer;
                   try {
-                    if (label !== 'Direct') {
+                    if (label !== t('direct')) {
                       label = new URL(label).hostname.replace('www.', '');
                     }
                   } catch {
@@ -406,8 +426,8 @@ export default function Analytics({ linkId }: { linkId: string }) {
         {/* Devices */}
         <Card>
           <CardHeader>
-            <CardTitle className="font-cal">Devices</CardTitle>
-            <CardDescription>Visitor device types</CardDescription>
+            <CardTitle className="font-cal">{t('devices')}</CardTitle>
+            <CardDescription>{t('devicesDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             {data.deviceBreakdown?.devices?.length ? (
@@ -438,7 +458,7 @@ export default function Analytics({ linkId }: { linkId: string }) {
               </div>
             ) : (
               <p className="py-6 text-center text-muted-foreground text-sm">
-                No device data yet
+                {t('noDeviceData')}
               </p>
             )}
           </CardContent>
@@ -447,8 +467,8 @@ export default function Analytics({ linkId }: { linkId: string }) {
         {/* Browsers */}
         <Card>
           <CardHeader>
-            <CardTitle className="font-cal">Browsers</CardTitle>
-            <CardDescription>Visitor browsers</CardDescription>
+            <CardTitle className="font-cal">{t('browsers')}</CardTitle>
+            <CardDescription>{t('browsersDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             {data.deviceBreakdown?.browsers?.length ? (
@@ -476,7 +496,7 @@ export default function Analytics({ linkId }: { linkId: string }) {
               </div>
             ) : (
               <p className="py-6 text-center text-muted-foreground text-sm">
-                No browser data yet
+                {t('noBrowserData')}
               </p>
             )}
           </CardContent>
@@ -485,8 +505,8 @@ export default function Analytics({ linkId }: { linkId: string }) {
         {/* Countries */}
         <Card>
           <CardHeader>
-            <CardTitle className="font-cal">Countries</CardTitle>
-            <CardDescription>Visitor locations</CardDescription>
+            <CardTitle className="font-cal">{t('countries')}</CardTitle>
+            <CardDescription>{t('countriesDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             {data.geoBreakdown?.length ? (
@@ -517,7 +537,7 @@ export default function Analytics({ linkId }: { linkId: string }) {
               </div>
             ) : (
               <p className="py-6 text-center text-muted-foreground text-sm">
-                No location data yet
+                {t('noLocationData')}
               </p>
             )}
           </CardContent>
@@ -528,10 +548,9 @@ export default function Analytics({ linkId }: { linkId: string }) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <div>
-            <CardTitle className="font-cal">Subscribers</CardTitle>
+            <CardTitle className="font-cal">{t('subscribers')}</CardTitle>
             <CardDescription>
-              {subscribers?.length ?? 0} email{' '}
-              {subscribers?.length === 1 ? 'subscriber' : 'subscribers'}
+              {t('subscriberCount', { count: subscribers?.length ?? 0 })}
             </CardDescription>
           </div>
           {subscribers && subscribers.length > 0 && (
@@ -545,22 +564,24 @@ export default function Analytics({ linkId }: { linkId: string }) {
                     .writeText(emails)
                     .then(() => {
                       toast({
-                        title: 'Copied!',
-                        description: `${subscribers.length} emails copied to clipboard.`,
+                        title: t('copied'),
+                        description: t('emailsCopied', {
+                          count: subscribers.length,
+                        }),
                       });
                     })
                     .catch(() => undefined);
                 }}
               >
                 <Copy className="mr-1.5 h-3.5 w-3.5" />
-                Copy all
+                {t('copyAll')}
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => {
                   downloadCsv('subscribers.csv', [
-                    ['Email', 'Subscribed'],
+                    [t('email'), t('subscribed')],
                     ...subscribers.map((sub) => [
                       sub.email,
                       toDayKey(sub.createdAt),
@@ -569,7 +590,7 @@ export default function Analytics({ linkId }: { linkId: string }) {
                 }}
               >
                 <Download className="mr-1.5 h-3.5 w-3.5" />
-                Export CSV
+                {t('exportCsv')}
               </Button>
             </div>
           )}
@@ -593,7 +614,7 @@ export default function Analytics({ linkId }: { linkId: string }) {
             <div className="flex flex-col items-center gap-2 py-8 text-center">
               <Mail className="h-8 w-8 text-muted-foreground/40" />
               <p className="text-muted-foreground text-sm">
-                No subscribers yet. Add an Email Collect card to your profile.
+                {t('noSubscribers')}
               </p>
             </div>
           )}
